@@ -1,0 +1,82 @@
+body{
+    background-color: black;
+}
+
+
+.bannerimage{
+    margin-top: 80px;
+    display: flex;                
+    flex-direction: column;      
+    align-items: center;          
+    text-align: center; 
+    overflow: hidden;
+    
+}
+
+.workingout{
+    top: 20%;
+    max-width: 75%; 
+    height: auto; 
+    border-radius: 15px;
+}
+
+.Overlaytext{
+    position: absolute;
+    top: 80%;
+    left: 20%;
+    font-size: 40px;
+    font-weight: bold;
+    color: white;
+}
+
+.bannerbuttons{
+    position: absolute;
+    bottom: 7%;
+    left: 20%;
+    display: flex;
+    gap: 10px;
+}
+.Signup{
+    background-color: lightskyblue;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    padding: 10px 30px;
+    outline: none;
+}
+.Login{
+    background-color: lightskyblue;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    padding: 10px 30px;
+    outline: none;
+}
+
+.Aboutus{
+    margin-top: 80px;
+    display: flex;                
+    flex-direction: column;      
+    align-items: center;          
+    text-align: center; 
+    overflow: hidden;
+    
+}
+
+.leaderboard{
+    top: 10%;
+    max-width: 30%; 
+    height: auto; 
+    border-radius: 15px;
+    margin-left: 650px;
+
+}
+
+.About{
+    position: relative;
+    top: 5%;
+    right: 20%;
+    font-size: 40px;
+    font-weight: bold;
+    color: white;
+}
