@@ -1,0 +1,71 @@
+/* Global Styles */
+body {
+    background-color: black;
+    color: white;
+    font-family: Arial, sans-serif;
+}
+
+.food-journal-container {
+    max-width: 500px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #333; /* Darker background to contrast with progress bars */
+    border-radius: 10px;
+    color: #fff; /* Text color for better contrast on dark background */
+}
+
+.calories-summary {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.calories-circle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+    position: relative;
+}
+
+.calorie-count {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: #4caf50; /* Color to match progress circle */
+}
+
+.macros p {
+    margin: 5px 0;
+    color: #ccc; /* Lighter color for macro labels */
+}
+
+.test-buttons {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.meal-section {
+    background-color: #444; /* Dark background for meal sections */
+    padding: 10px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+    color: #fff;
+}
+
+.add-food-button {
+    background-color: #1e88e5; /* Primary color for add food button */
+    color: #fff;
+}
+
+.add-food-button:hover {
+    background-color: #1565c0; /* Darker shade on hover */
+}
+
