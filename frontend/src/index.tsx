@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import FoodJournal from './FoodJournal';
+import Signup from './Signup';
 //import Home from './Home';
 import reportWebVitals from './reportWebVitals';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
@@ -15,7 +16,7 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
-    <FoodJournal />
+    <Signup />
   </React.StrictMode>
 );
 
