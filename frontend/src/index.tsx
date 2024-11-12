@@ -5,6 +5,7 @@ import App from './App';
 import FoodJournal from './FoodJournal';
 import Signup from './Signup';
 import Login from './Login';
+import WorkoutJournal from './WorkoutJournal';
 //import Home from './Home';
 import reportWebVitals from './reportWebVitals';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
@@ -17,7 +18,7 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
-    <Login />
+    <WorkoutJournal />
   </React.StrictMode>
 );
 
