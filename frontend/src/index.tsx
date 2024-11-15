@@ -9,6 +9,7 @@ import WorkoutJournal from './WorkoutJournal';
 //import Home from './Home';
 import reportWebVitals from './reportWebVitals';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
+import QueryProvider from '../context/QueryProvider';
 
 // Create a default MUI theme (you can customize this later if needed)
 const theme = createTheme();
@@ -18,7 +19,9 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
-    <WorkoutJournal />
+    <QueryProvider>
+      <WorkoutJournal />
+    </QueryProvider>
   </React.StrictMode>
 );
 
