@@ -31,10 +31,6 @@ const router = createBrowserRouter([
     element: <Feedpage />,
   },
   {
-    path: '/Feedpage',
-    element: <Feedpage />,
-  },
-  {
     path: '/WorkoutJournal',
     element: <WorkoutJournal />,
   },
