@@ -1,9 +1,19 @@
-import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Home.css'; 
-import workingout from './workingout.jpg'
-import leaderboard from  './leaderboard.jpg'
+import workingout from '../image_assets/workingout.jpg'
+import leaderboard from  '../image_assets/leaderboard.jpg'
 
 function Home() {
+    const navigate = useNavigate();
+
+    const onLogin = () => {
+        navigate('/Login')
+    }
+
+    const onSignup = () => {
+        navigate('/Signup')
+    }
+
 return(
     <div className="bannerimage">
         <img className="workingout"
@@ -15,8 +25,8 @@ return(
             </div>
 
             <div className="bannerbuttons">
-                <button className="Signup">Sign Up</button>
-                <button className="Login">Login</button>
+                <button className="Signup" onClick={onSignup}>Sign Up</button>
+                <button className="Login" onClick={onLogin}>Login</button>
             </div>
 
             <div className="Aboutus">

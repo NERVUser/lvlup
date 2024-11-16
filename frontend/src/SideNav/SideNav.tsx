@@ -1,9 +1,5 @@
 import React from "react";
 import "./SideNav.css";
-//import { Link } from '@mui/material';
-import { Link } from "react-router-dom";
-import LocalDiningIcon from "@mui/icons-material/LocalDining";
-import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/FitnessCenter";
 import FastfoodIcon from '@mui/icons-material/Restaurant';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';

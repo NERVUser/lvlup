@@ -1,6 +1,5 @@
 import React from 'react';
 import './Post.css';
-//import { Link } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import IconButton from '@mui/material/IconButton';

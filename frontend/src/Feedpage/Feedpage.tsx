@@ -4,8 +4,6 @@ import SideNav from "../SideNav/SideNav";
 import "./Feedpage.css";
 import PostFeed from "../PostFeed/PostFeed";
 import Leaderboard from "../Leaderboard/Leaderboard";
-import workingout from "../image_assets/workingout.jpg";
-import leaderboard from "../image_assets/leaderboard.jpg";
 
 import {
   Button,
