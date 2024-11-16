@@ -13,6 +13,15 @@ import {
 } from "@mui/material";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import EditIcon from "@mui/icons-material/Edit";
+import Post from "../Post/Post";
+
+const samplePost = {
+  profileImage: 'https://example.com/profile.jpg',
+  username: 'JohnDoe',
+  postImage: 'https://example.com/post.jpg',
+  caption: 'Enjoying the sunset!',
+  likes: 42,
+};
 
 const Feedpage = () => {
   const posts = [
@@ -20,7 +29,7 @@ const Feedpage = () => {
       profileImage:
         "/Users/amitmelamed/Desktop/lvlup/frontend/src/leaderboard.jpg",
       username: "@john1218",
-      postImage: "https://via.placeholder.com/500",
+      postImage: "https://th.bing.com/th/id/OIG1.wQ7nqzXG6LLji1s3MrOP",
       caption: "Best lift in awhile",
       likes: 0,
     },
@@ -43,7 +52,7 @@ const Feedpage = () => {
     <div className="Feedpage">
       <SideNav />
       <div className="PostContainer">
-        <PostFeed posts={posts} />
+        <PostFeed posts={posts} /> 
       </div>
       <div className="LeaderBoardContainer">
       <Leaderboard/>

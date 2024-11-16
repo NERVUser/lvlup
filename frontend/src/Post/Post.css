@@ -3,27 +3,35 @@
     height: 525px;
     border-bottom-right-radius: 15px;
     border-bottom-left-radius: 15px;
-    margin-left: -100px;
-    background-color: wheat;
+    margin-top: 60px;
+    margin-bottom: 120px;
+    margin-right: 40px;
+    margin-left: 40px;
+    background-color: black;
     
 }
 .PostHeader{
     display: flex;
+    flex-direction: row;
+    margin-bottom: 20px;
+    gap: 1rem;
+    justify-content: space-between;
     align-items: center;
-    width: 600px;
-    height: 30px;
-    background-color: #FAF9F6;
 }
-.ProfileImage{
-    margin-left: 10px;
-    margin-right: 10px;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
+
+.UserInfo{
+    display: flex;
+    flex-direction: row;
+    margin: 0;
+    padding: 0;
+    gap: 1rem;
+    align-items: center;
 }
+
 .Username{
     font-weight: bold;
     font-family: Arial, Helvetica, sans-serif;
+    color: white
 }
 .PostBody{
     padding: 10px;
@@ -31,22 +39,40 @@
     
 }
 .PostImage{
-    width: 94%;
-    max-height: 360px;
-    border-radius: 10px;
-    margin-left: 3%;
+   padding-top: 10px;
+   padding-top: 10px;
+   padding-left: 10px;
+   padding-right: 10px;
+   width: 100%;
+}
+.Image{
+    width: 100%;
+    border-radius: 6px;
 }
 .Caption{
     padding-left: 5px;
     margin: 0px;
     font-family: 'Acari Sans', sans-serif;
     border-top: black solid 2px;
-    padding-top: 1rem;
+    padding-top: 0.5rem;
+    padding-bottom: 1.5rem;
+}
+.FooterIcons{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1rem;
 }
 .Likes{
     font-weight: bold;
-    display: flex;
     align-items: center;
-    margin: 0px;
+    display: flex;
+    justify-content: center;
+    margin: 0;
     font-family: 'Acari Sans', sans-serif;
+    padding: 0;
+    
+}
+.LikeIcon {
+    color: white; 
 }
