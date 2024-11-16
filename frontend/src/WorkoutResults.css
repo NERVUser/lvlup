@@ -1,1 +1,24 @@
+.WorkoutTable{
+    border: 1px solid;
+    width: 80%
+    flex-direction: column-reverse;
+    align-items: baseline;
+    justify-content: baseline;
 
+}
+
+
+.WorkoutResults{
+    display: flex;
+    align-items: baseline;
+    width: 300px;
+    height: 30px;
+    background-color: #f08080;
+}
+
+.SwitchDates{
+    background-color: #ffebcd;
+    color: #d8bfd8;
+    font-weight: lighter;
+    margin-inline-start: auto;
+}
