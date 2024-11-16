@@ -1,0 +1,89 @@
+@keyframes ScoreLoad {
+    from {
+        background-color: rgb(142, 219, 255);
+    }
+    to {
+        background-color: white;
+    }
+}
+
+.LeaderboardContainer{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 30rem;
+    background-color: rgb(100, 217, 246);
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    padding-bottom: 0.5rem;
+    padding-top: 2rem;
+    border-radius: 1rem;
+}
+.Title{
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
+    font-family: 'Acari Sans', sans-serif;
+    letter-spacing: 0.5px;                                         
+}
+.Title h1{
+    padding: 0;
+    margin: 0;
+}
+
+
+.Buttons{
+    display: flex;
+    color: red;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin: 2rem;
+}
+.ButtonObject button{
+    height: 2.5rem;
+    width: 6rem;
+    border-radius: 100vmax;
+    cursor: pointer;
+    border: none;
+}
+.ButtonObject button:hover{
+    background-color: lightblue;
+}
+.Scores{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: space-around;
+    flex-direction: column;
+    
+}
+.ScoreObject:nth-child(1){
+    animation-delay: 0.4s;
+}
+.ScoreObject:nth-child(2){
+    animation-delay: 0.8s;
+}
+.ScoreObject:nth-child(3){
+    animation-delay: 1.2s;
+}
+.ScoreObject:nth-child(4){
+    animation-delay: 1.6s;
+}
+.ScoreObject:nth-child(5){
+    animation-delay: 2.0s;
+}
+.ScoreObject{
+    width: 100%;
+    height: 2rem;
+    border-radius: 100vmax;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    background-color: white;
+    animation: ScoreLoad 1.4s ease-out backwards;
+
+}
+.ScoreObject p{
+    padding: 0;
+    margin: 0;
+}

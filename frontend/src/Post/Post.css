@@ -1,0 +1,52 @@
+.Post{
+    width: 600px;
+    height: 525px;
+    border-bottom-right-radius: 15px;
+    border-bottom-left-radius: 15px;
+    margin-left: -100px;
+    background-color: wheat;
+    
+}
+.PostHeader{
+    display: flex;
+    align-items: center;
+    width: 600px;
+    height: 30px;
+    background-color: #FAF9F6;
+}
+.ProfileImage{
+    margin-left: 10px;
+    margin-right: 10px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+}
+.Username{
+    font-weight: bold;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.PostBody{
+    padding: 10px;
+    gap: 1px;
+    
+}
+.PostImage{
+    width: 94%;
+    max-height: 360px;
+    border-radius: 10px;
+    margin-left: 3%;
+}
+.Caption{
+    padding-left: 5px;
+    margin: 0px;
+    font-family: 'Acari Sans', sans-serif;
+    border-top: black solid 2px;
+    padding-top: 1rem;
+}
+.Likes{
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    margin: 0px;
+    font-family: 'Acari Sans', sans-serif;
+}

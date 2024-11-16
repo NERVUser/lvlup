@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import './Signup.css';
 import { TextField, Button, Typography, Box } from '@mui/material';
 
-function Login() {
+function Signup() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
 
-    const handleLogin = () => {
-        // Logic for login action can be implemented here
-        console.log("Log in with:", { email, password });
+    const handleSignup = () => {
+        // Logic for signup action can be implemented here
+        console.log("Sign up with:", { email, password, confirmPassword });
     };
 
     return (
@@ -34,18 +35,28 @@ function Login() {
                     onChange={(e) => setPassword(e.target.value)}
                     className="input-field"
                 />
+                <TextField
+                    label="Confirm Password"
+                    type="password"
+                    variant="outlined"
+                    fullWidth
+                    margin="normal"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="input-field"
+                />
                 <Button
                     variant="contained"
                     color="primary"
                     fullWidth
-                    onClick={handleLogin}
+                    onClick={handleSignup}
                     className="signup-button"
                 >
-                    Log In
+                    Create Account
                 </Button>
             </Box>
         </Box>
     );
 }
 
-export default Login;
+export default Signup;
