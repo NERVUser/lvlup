@@ -1,0 +1,18 @@
+.flex-row{
+    display: flex;
+    direction: row;
+}
+.flex-col{
+    display: flex;
+    direction: column;
+}
+
+.Header{
+    gap: 0.5rem;
+}
+.Avatar{
+    --h:145px;
+    width: var(--h) !important;
+    height: var(--h) !important;
+}
+

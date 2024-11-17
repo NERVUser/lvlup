@@ -16,10 +16,10 @@ import EditIcon from "@mui/icons-material/Edit";
 import Post from "../Post/Post";
 
 const samplePost = {
-  profileImage: 'https://example.com/profile.jpg',
-  username: 'JohnDoe',
-  postImage: 'https://example.com/post.jpg',
-  caption: 'Enjoying the sunset!',
+  profileImage: "https://example.com/profile.jpg",
+  username: "JohnDoe",
+  postImage: "https://example.com/post.jpg",
+  caption: "Enjoying the sunset!",
   likes: 42,
 };
 
@@ -52,13 +52,13 @@ const Feedpage = () => {
     <div className="Feedpage">
       <SideNav />
       <div className="PostContainer">
-        <PostFeed posts={posts} /> 
+        <PostFeed posts={posts} />
       </div>
       <div className="LeaderBoardContainer">
-      <Leaderboard/>
+        <div className="Leaderboard">
+        <Leaderboard/>
+        </div>
       </div>
-   
-     
     </div>
   );
 };

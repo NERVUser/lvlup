@@ -1,0 +1,12 @@
+.Feed{
+    display: flex;
+    background-color: whitesmoke;
+}
+
+.FeedWrapper{
+    padding-top: 20px;
+    padding-bottom: 20px;
+    padding-left: 20px;
+    padding-right: 20px;
+    background-color: red;
+}

@@ -1,0 +1,63 @@
+.Post{
+    width: 40rem;
+    height: 100%;
+    background-color: white;
+    border-radius: 10px;
+    color: black;
+}
+
+.PostWrapper{
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-bottom: 30px;
+
+}
+.PostHeader{
+    padding-top: 20px;
+    padding-bottom: 5px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.HeaderLeft{
+    display: flex;
+    align-items: center;
+}
+.ProfilePic{
+    width: 32px;
+    height: 32px;
+    border-radius: 50px;
+    object-fit: cover;
+}
+.Username{
+    margin-left: 10px;
+    margin-right: 10px;
+    font-size: 16px;
+    color: black;
+}
+.PostDate{
+    font-size: 13px;
+    color: rgb(83, 83, 83)
+}
+.PostBody{
+    margin-top: 0;
+    margin-bottom: 0;
+    margin-left: 20px;
+    margin-right: 20px;
+    
+}
+.BodyText{
+    padding-left: 1rem;
+    
+}
+.PostImage{
+    border-radius: 30px;
+    width: 100%;
+    max-height: 500px;
+}
+.PostBottom{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}

@@ -7,6 +7,10 @@ import Home from './Home/Home';
 import Feedpage from './Feedpage/Feedpage'
 import WorkoutJournal from './WorkoutJournal/WorkoutJournal'
 import FoodJournal from './FoodJournal/FoodJournal'
+import AccountPage from './AccountPage/AccountPage';
+import SideNav from './SideNav/SideNav';
+import Feed from './Feed/Feed';
+import Share from './Share/Share';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 
 // Create a default MUI theme (you can customize this later if needed)
@@ -37,6 +41,22 @@ const router = createBrowserRouter([
   {
     path: '/FoodJournal',
     element: <FoodJournal />,
+  },
+  {
+    path: '/AccountPage',
+    element: <AccountPage />,
+  },
+  {
+    path: '/SideNav',
+    element: <SideNav />,
+  },
+  {
+    path: '/Feed',
+    element: <Feed/>,
+  },
+  {
+    path: '/Share',
+    element: <Share/>,
   },
 ]);
 

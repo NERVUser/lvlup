@@ -1,0 +1,52 @@
+.Share{
+    width: 50rem;
+    height: 150px;
+    background-color: white;
+    border-radius: 10px;
+}
+.ShareWrapper{
+    padding: 10px;
+}
+.ShareHeader{
+    display: flex;
+    align-items: center;
+    padding-top: 0.6rem;
+}
+.Option{
+    display: flex;
+    align-items: center;
+    color: black;
+    gap: 0.3rem;
+}
+
+.ShareInput{
+    margin-top: 0.5rem;
+    border: none;
+    width: 80%;
+    margin-left: 1rem;
+    font-size: 18px;
+}
+.Share hr{
+    margin: 20px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+.ShareFooter{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+}
+.PostButton{
+    border: none;
+    padding: 10px;
+    width: 5rem;
+    border-radius: 100vmax;
+    background-color: rgb(0, 184, 245);
+    cursor: pointer;
+    color: white;
+    margin-right: 20px;
+}

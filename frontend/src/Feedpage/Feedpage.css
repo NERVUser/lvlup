@@ -3,12 +3,7 @@
     display: flex;
     background-color: black;
     height: 100%;
-    justify-content: space-between;
     width: 100%;
 }
 
 
-.LeaderBoardContainer{
-    margin-left: 5px;
-    margin-top: 50px;
-}
