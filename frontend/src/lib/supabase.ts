@@ -60,22 +60,21 @@ export const logOut = async () => {
   if(error) throw new Error(error.message);
 }
 
-// used to get our user's data
-// export const getUser = async (type: string, id: number) => {
-//   return useQuery({
-//     queryKey: ['profiles', id],
-//     queryFn: async () => {
-//       const { data, error } = await supabase
-//         .from('profiles')
-//         .select('*')
-//         .eq(type, id)
-//         .single();
-//       if(error)
-//         throw new Error(error.message);
-//       return data
-//     }
-//   })
-// }
+// used to get our user's data in a query
+export const getUserQuery = async (type: string, id: number) => ({
+  queryKey: ['profiles', id],
+  queryFn: async () => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq(type, id)
+      .single();
+
+    if(error)
+      throw new Error(error.message);
+    return data
+  }
+})
 
 // //update our user
 // export const useUpdateUser = () => {

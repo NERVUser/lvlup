@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './Signup.css';
-import { TextField, Button, Typography, Box } from '@mui/material';
+import { TextField, Button, Typography, Box, CircularProgress } from '@mui/material';
 import { createUser } from '../lib/supabase'
 import { useNavigate } from 'react-router-dom';
 
@@ -8,14 +8,9 @@ function Signup() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
     const navigate = useNavigate();
-
-    const resetFields = () => {
-      setEmail('');
-      setPassword('');
-      setConfirmPassword('');
-    }
 
     const handleSignup = async () => {
         // Logic for signup action can be implemented here
@@ -28,14 +23,19 @@ function Signup() {
         if(password !== confirmPassword)
           return window.alert('Error, Passwords do not match');
 
+        setIsLoading(true);
+
         try {
           const result = await createUser(email, password);
           if(result){
             // set our user and set is logged in to true
-            resetFields();
+            console.log('Result: ', result)
+            navigate('/AccountSetup')
           }
         } catch (error) {
           console.log(error);
+        } finally {
+          setIsLoading(false);
         }
     };
 
@@ -72,15 +72,21 @@ function Signup() {
             onChange={(e) => setConfirmPassword(e.target.value)}
             className="input-field"
           />
-          <Button
-            color='primary'
-            variant='contained'
-            fullWidth
-            onClick={handleSignup}
-            className="signup-button"
-          >
-            Create Account
-          </Button>
+          <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+            {isLoading ? (
+              <CircularProgress />
+            ) : (
+              <Button
+                color='primary'
+                variant='contained'
+                fullWidth
+                onClick={handleSignup}
+                className="signup-button"
+              >
+                Create Account
+              </Button>
+            )}
+          </Box>
           <div
             className='login-container'
           >
