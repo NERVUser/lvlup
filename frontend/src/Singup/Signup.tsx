@@ -2,11 +2,14 @@ import React, { useState } from 'react';
 import './Signup.css';
 import { TextField, Button, Typography, Box } from '@mui/material';
 import { createUser } from '../lib/supabase'
+import { useNavigate } from 'react-router-dom';
 
 function Signup() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+
+    const navigate = useNavigate();
 
     const resetFields = () => {
       setEmail('');
@@ -81,11 +84,12 @@ function Signup() {
           <div
             className='login-container'
           >
-            <p>or</p>
+            <p>Aleady Have an Account?</p>
             <Button
               variant='text'
               color='primary'
-              fullWidth
+              className='login-button'
+              onClick={() => navigate('/Login')}
             >
               Login
             </Button>

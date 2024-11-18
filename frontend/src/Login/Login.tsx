@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import './Login.css';
 import { TextField, Button, Typography, Box } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  const navigate = useNavigate();
 
   const handleLogin = () => {
       // Logic for login action can be implemented here
@@ -43,6 +46,17 @@ function Login() {
         >
           Log In
         </Button>
+        <div className='noAccount-container'>
+          <p>Don't have an account?</p>
+          <Button
+            variant='text'
+            color='primary'
+            className='signup-button'
+            onClick={() => navigate('/Signup')}
+          >
+            Signup
+          </Button>
+        </div>
       </Box>
     </Box>
   );
