@@ -1,3 +1,5 @@
+/* FoodJournal.css */
+
 /* Global Styles */
 body {
     background-color: black;
@@ -43,12 +45,6 @@ body {
     color: #ccc; /* Lighter color for macro labels */
 }
 
-.test-buttons {
-    display: flex;
-    gap: 8px;
-    margin-top: 10px;
-}
-
 .meal-section {
     background-color: #444; /* Dark background for meal sections */
     padding: 10px;
@@ -60,6 +56,10 @@ body {
     color: #fff;
 }
 
+.meal-section .MuiListItemText-secondary {
+    color: #bbb; /* Light grey for secondary text to improve contrast and readability */
+}
+
 .add-food-button {
     background-color: #1e88e5; /* Primary color for add food button */
     color: #fff;
@@ -67,4 +67,16 @@ body {
 
 .add-food-button:hover {
     background-color: #1565c0; /* Darker shade on hover */
+}
+
+.MuiIconButton-root {
+    color: #fff; /* Ensure icons are visible on dark backgrounds */
+}
+
+.MuiListItem-root {
+    color: #fff; /* Ensure list items text is readable */
+}
+
+.MuiListItemText-primary {
+    color: #f0f0f0; /* Set primary text to a slightly brighter white for better readability */
 }
