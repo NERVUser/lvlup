@@ -41,15 +41,12 @@ const Feedpage = () => {
   ];
   return (
     <div className="Feedpage">
-      <SideNav />
       <div className="PostContainer">
         <PostFeed posts={posts} />
       </div>
       <div className="LeaderBoardContainer">
-      <Leaderboard/>
+        <Leaderboard/>
       </div>
-   
-     
     </div>
   );
 };

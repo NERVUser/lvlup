@@ -1,6 +1,6 @@
 import React from 'react'
 
-const AccountSetup = () => {
+function AccountSetup() {
   return (
     <div>AccountSetup</div>
   )
