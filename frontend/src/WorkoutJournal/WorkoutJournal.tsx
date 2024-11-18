@@ -13,12 +13,15 @@ import {
     ListItem,
     ListItemText,
     CircularProgress,
+    IconButton,
 } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { DateCalendar } from '@mui/x-date-pickers';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import './WorkoutJournal.css';
 
 // Register chart components
@@ -46,26 +49,73 @@ const options = {
 const WorkoutJournal: React.FC = () => {
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [openDialog, setOpenDialog] = useState(false);
-    const [calories, setCalories] = useState(0);
-    const [time, setTime] = useState(0);
+    const [calories, setCalories] = useState<number | null>(null);
+    const [time, setTime] = useState<number | null>(null);
     const [exercises, setExercises] = useState<{ name: string; sets: string }[]>([]);
     const [exerciseName, setExerciseName] = useState('');
     const [exerciseSets, setExerciseSets] = useState('');
+    const [editDialogOpen, setEditDialogOpen] = useState(false);
+    const [editIndex, setEditIndex] = useState<number | null>(null);
+    const [editWorkoutDialogOpen, setEditWorkoutDialogOpen] = useState(false);
 
-    const calorieGoal = 500; // Example goal for dynamic circular progress
-    const caloriePercentage = (calories / calorieGoal) * 100;
+    const calorieGoal = 1000; // Set the new calorie goal for 1 loop
+    const caloriePercentage = calories ? (calories >= calorieGoal ? 100 : (calories / calorieGoal) * 100) : 0;
+    const progressColor = calories && calories >= calorieGoal ? 'success' : 'primary';
 
     const handleAddWorkout = () => setOpenDialog(true);
-    const handleCloseDialog = () => setOpenDialog(false);
+    const handleCloseDialog = () => {
+        setOpenDialog(false);
+    };
 
     const handleAddExercise = () => {
-        setExercises([...exercises, { name: exerciseName, sets: exerciseSets }]);
-        setExerciseName('');
-        setExerciseSets('');
+        if (exerciseName.trim() !== '' && exerciseSets.trim() !== '') {
+            setExercises([...exercises, { name: exerciseName, sets: exerciseSets }]);
+            setExerciseName('');
+            setExerciseSets('');
+        }
     };
 
     const handleSaveWorkout = () => {
-        handleCloseDialog();
+        if (calories !== null && time !== null) {
+            handleAddExercise();
+        }
+        setOpenDialog(false);
+    };
+
+    const handleEditExercise = (index: number) => {
+        setEditIndex(index);
+        setExerciseName(exercises[index].name);
+        setExerciseSets(exercises[index].sets);
+        setEditDialogOpen(true);
+    };
+
+    const handleSaveEditExercise = () => {
+        if (editIndex !== null) {
+            const updatedExercises = [...exercises];
+            updatedExercises[editIndex] = { name: exerciseName, sets: exerciseSets };
+            setExercises(updatedExercises);
+            setEditIndex(null);
+            setExerciseName('');
+            setExerciseSets('');
+            setEditDialogOpen(false);
+        }
+    };
+
+    const handleDeleteExercise = (index: number) => {
+        const updatedExercises = exercises.filter((_, i) => i !== index);
+        setExercises(updatedExercises);
+        if (updatedExercises.length === 0) {
+            setCalories(null);
+            setTime(null);
+        }
+    };
+
+    const handleEditWorkout = () => {
+        setEditWorkoutDialogOpen(true);
+    };
+
+    const handleSaveEditWorkout = () => {
+        setEditWorkoutDialogOpen(false);
     };
 
     return (
@@ -96,6 +146,12 @@ const WorkoutJournal: React.FC = () => {
                         {exercises.map((exercise, index) => (
                             <ListItem key={index}>
                                 <ListItemText primary={exercise.name} secondary={exercise.sets} />
+                                <IconButton aria-label="edit" onClick={() => handleEditExercise(index)}>
+                                    <EditIcon />
+                                </IconButton>
+                                <IconButton aria-label="delete" onClick={() => handleDeleteExercise(index)}>
+                                    <DeleteIcon />
+                                </IconButton>
                             </ListItem>
                         ))}
                     </List>
@@ -121,7 +177,7 @@ const WorkoutJournal: React.FC = () => {
                             value={caloriePercentage}
                             size={100}
                             thickness={5}
-                            color="primary"
+                            color={progressColor}
                         />
                         <div style={{
                             position: 'absolute',
@@ -134,13 +190,18 @@ const WorkoutJournal: React.FC = () => {
                             justifyContent: 'center',
                             flexDirection: 'column'
                         }}>
-                            <Typography variant="h5">{calories}</Typography>
+                            <Typography variant="h5">{calories !== null ? calories : 0}</Typography>
                             <Typography variant="caption">Calories</Typography>
                         </div>
                     </div>
                     <div style={{ marginTop: '20px' }}>
-                        <Typography variant="h5">{time} Minutes</Typography>
+                        <Typography variant="h5">{time !== null ? time : 0} Minutes</Typography>
                     </div>
+                    {calories !== null && time !== null && (
+                        <IconButton aria-label="edit" onClick={handleEditWorkout} style={{ marginTop: '10px' }}>
+                            <EditIcon />
+                        </IconButton>
+                    )}
                 </CardContent>
             </Card>
 
@@ -153,7 +214,7 @@ const WorkoutJournal: React.FC = () => {
                         type="number"
                         fullWidth
                         margin="dense"
-                        value={calories}
+                        value={calories !== null ? calories : ''}
                         onChange={(e) => setCalories(Number(e.target.value))}
                     />
                     <TextField
@@ -161,7 +222,7 @@ const WorkoutJournal: React.FC = () => {
                         type="number"
                         fullWidth
                         margin="dense"
-                        value={time}
+                        value={time !== null ? time : ''}
                         onChange={(e) => setTime(Number(e.target.value))}
                     />
                     <TextField
@@ -188,6 +249,66 @@ const WorkoutJournal: React.FC = () => {
                     </Button>
                     <Button onClick={handleSaveWorkout} color="primary" variant="contained">
                         Save Workout
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Edit Exercise Dialog */}
+            <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)}>
+                <DialogTitle>Edit Exercise</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        label="Exercise Name"
+                        fullWidth
+                        margin="dense"
+                        value={exerciseName}
+                        onChange={(e) => setExerciseName(e.target.value)}
+                    />
+                    <TextField
+                        label="Sets (e.g., 3x10)"
+                        fullWidth
+                        margin="dense"
+                        value={exerciseSets}
+                        onChange={(e) => setExerciseSets(e.target.value)}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setEditDialogOpen(false)} color="secondary">
+                        Cancel
+                    </Button>
+                    <Button onClick={handleSaveEditExercise} color="primary" variant="contained">
+                        Save Changes
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Edit Workout Dialog */}
+            <Dialog open={editWorkoutDialogOpen} onClose={() => setEditWorkoutDialogOpen(false)}>
+                <DialogTitle>Edit Today's Workout</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        label="Calories Burned"
+                        type="number"
+                        fullWidth
+                        margin="dense"
+                        value={calories !== null ? calories : ''}
+                        onChange={(e) => setCalories(Number(e.target.value))}
+                    />
+                    <TextField
+                        label="Time Spent (minutes)"
+                        type="number"
+                        fullWidth
+                        margin="dense"
+                        value={time !== null ? time : ''}
+                        onChange={(e) => setTime(Number(e.target.value))}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setEditWorkoutDialogOpen(false)} color="secondary">
+                        Cancel
+                    </Button>
+                    <Button onClick={handleSaveEditWorkout} color="primary" variant="contained">
+                        Save Changes
                     </Button>
                 </DialogActions>
             </Dialog>
