@@ -1,52 +1,68 @@
-.Share{
-    width: 50rem;
-    height: 150px;
-    background-color: white;
-    border-radius: 10px;
+.Share {
+  width: 105%;
+  height: 150px;
+  background-color: rgba(200, 208, 255, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 10px;
 }
-.ShareWrapper{
-    padding: 10px;
+.ShareWrapper {
+  padding: 10px;
 }
-.ShareHeader{
-    display: flex;
-    align-items: center;
-    padding-top: 0.6rem;
+.ShareHeader {
+  display: flex;
+  align-items: center;
+  padding-top: 0.6rem;
 }
-.Option{
-    display: flex;
-    align-items: center;
-    color: black;
-    gap: 0.3rem;
+.Option {
+  display: flex;
+  align-items: center;
+  color: black;
+  gap: 0.3rem;
 }
 
-.ShareInput{
-    margin-top: 0.5rem;
-    border: none;
-    width: 80%;
-    margin-left: 1rem;
-    font-size: 18px;
+.ShareInput {
+  margin-top: 0.5rem;
+  border: none;
+  width: 80%;
+  margin-left: 1rem;
+  font-size: 18px;
+  border-radius: 5px;
+  font-family: 'Inter', sans-serif;
+  padding-left: 0.5rem;
 }
-.Share hr{
-    margin: 20px;
-    cursor: pointer;
-    margin-right: 10px;
+.OptionIcon {
+  font-family: 'Inter', sans-serif;
 }
-.ShareFooter{
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-left: 20px;
-    display: flex;
-    align-items: center;
-    gap: 3rem;
+.Share hr {
+  margin: 20px;
+  cursor: pointer;
+  margin-right: 10px;
 }
-.PostButton{
-    border: none;
-    padding: 10px;
-    width: 5rem;
-    border-radius: 100vmax;
-    background-color: rgb(0, 184, 245);
-    cursor: pointer;
-    color: white;
-    margin-right: 20px;
+.ShareFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-left: 20px;
+  display: flex;
+  align-items: center;
+  gap: 3rem;
+  font-family: 'Inter', sans-serif;
+  
+}
+.PostButton {
+  border: none;
+  padding-right: 20px;
+  padding-left: 20px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  width: 5rem;
+  border-radius: 100vmax;
+  background-color: rgba(53, 62, 113, 0.86);
+  cursor: pointer;
+  color: white;
+  margin-right: 20px;
 }

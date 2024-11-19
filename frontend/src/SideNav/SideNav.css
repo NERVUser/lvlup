@@ -1,15 +1,15 @@
 .SideNav{
     height: 100%;
-    width: 300px;
-    background-color: lightblue;
-    position: fixed;
+    width: 100%;
+    /* background-color: rgba(18, 21, 39, 1); */
+    background-color: black;
     flex-direction: column;
 
 }
 .Nav{
-    padding: 20px;
+    margin-top: 5rem;
     margin-left: 1rem;
-    margin-top: 3rem;
+    padding: 20px;
 }
 .NavBarList{
     font-family: 'Work Sans', sans-serif;
@@ -21,22 +21,51 @@
     list-style: none;
     gap: 2rem;
 }
-.ListItem{
+.ListItem {
     display: flex;
     align-items: center;
     gap: 0.8rem;
     cursor: pointer;
+    font-family: 'Inter', sans-serif;
+
+                                                
+}
+.ListItem span{
+    font-size: 14px;
+    color: rgb(131, 130, 130);
+
+}
+.ListItem:hover span{
+    color: rgb(255, 255, 255);
+
+}
+.ListItem:hover .ListItemIcon:nth-child(1){
+    background-color: rgba(0, 187, 255, 0.86);
 }
 
+
 .ListItemIcon{
-  
+    height: 2.5rem;
+    width: 2.5rem;
+    border-radius: 0.75rem;
+    background-color: rgba(53, 62, 113, 0.86);
     margin-right: 6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.ListItemIcon svg{ 
+    width: 50%;
+    height: 50%;
 }
 .Footer{
+    font-family: 'Inter', sans-serif;
     padding-top: 90%;
 }
 
 .Logout{
+    font-family: 'Inter', sans-serif;
     height: 2.5rem;
     width: 100%;
     border-radius: 100vmax;

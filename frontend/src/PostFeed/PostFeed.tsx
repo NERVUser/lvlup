@@ -1,6 +1,5 @@
 import React from 'react';
 import Post from '../Post/Post';
-import './PostFeed.css'
 //import { Link } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';

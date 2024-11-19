@@ -7,7 +7,6 @@ import RecommendIcon from "@mui/icons-material/Recommend";
 import FitnessCenterIcon from "@mui/icons-material/FitnessCenter";
 import LunchDiningIcon from "@mui/icons-material/LunchDining";
 import LogoutIcon from "@mui/icons-material/Logout";
-<style>@import url('https://fonts.cdnfonts.com/css/work-sans');</style>;
 
 function SideNav() {
   return (
@@ -15,19 +14,27 @@ function SideNav() {
       <div className="Nav">
         <ul className="NavBarList">
           <li className="ListItem">
-            <FitnessCenterIcon className="ListItemIcon" />
+            <div className="ListItemIcon">
+              <FitnessCenterIcon />
+            </div>
             <span className="ListItemText">Workout</span>
           </li>
           <li className="ListItem">
-            <LunchDiningIcon className="ListItemIcon" />
+            <div className="ListItemIcon">
+              <LunchDiningIcon />
+            </div>
             <span className="ListItemText">Food</span>
           </li>
           <li className="ListItem">
-            <AccountCircleIcon className="ListItemIcon" />
+            <div className="ListItemIcon">
+              <AccountCircleIcon />
+            </div>
             <span className="ListItemText">Account</span>
           </li>
           <li className="ListItem">
-            <RecommendIcon className="ListItemIcon" />
+            <div className="ListItemIcon">
+              <RecommendIcon />
+            </div>
             <span className="ListItemText">Recommended</span>
           </li>
           <div className="Footer">

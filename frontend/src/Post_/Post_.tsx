@@ -17,12 +17,18 @@ export default function Post_() {
           </div>
           <div className="HeaderRight"></div>
         </div>
-        <div className="PostBody"></div>
-            <span className="BodyText">My first post!</span>
-            <img className="PostImage" src="https://th.bing.com/th/id/OIG2.9O4YqGf98tiYzjKDvg7L" alt="" />
+        <div className="PostBody">
+          <p className="BodyText">My first post!</p>
+          <div className="PostImage">
+            <img
+              src="https://th.bing.com/th/id/OIG2.9O4YqGf98tiYzjKDvg7L"
+              alt=""
+            />
+          </div>
+        </div>
         <div className="PostFooter">
-            <div className="FooterLeft"></div>
-            <div className="FooterRight"></div>
+          <div className="FooterLeft"></div>
+          <div className="FooterRight"></div>
         </div>
       </div>
     </div>

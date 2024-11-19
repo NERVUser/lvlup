@@ -1,5 +1,4 @@
 import React from "react";
-import "./Post.css";
 import { Avatar } from "@mui/material";
 import { Link } from "react-router-dom";
 import { useState } from "react";
