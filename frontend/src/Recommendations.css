@@ -1,0 +1,15 @@
+.recommendations-holder {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: baseline;
+    background-color: beige;
+
+}
+.recommendations_list {
+    margin: auto;
+    padding: 0;
+    list-style: circle;
+}
+.actual_recommendation {
+    font: 10px;
+}
