@@ -1,44 +1,39 @@
 import React from 'react';
 import Post from '../Post/Post';
-import './PostFeed.css'
-//import { Link } from '@mui/material';
+import './PostFeed.css';
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
 import IconButton from '@mui/material/IconButton';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 
-
-interface FeedProps{
+interface FeedProps {
     posts: {
-    profileImage: string;
-    username: string;
-    postImage: string;
-    caption: string;
-    likes: number;
-    }[]
-
+        id: number;
+        profileImage: string;
+        username: string;
+        postImage: string;
+        caption: string;
+        likes: number;
+    }[];
+    onLike: (postId: number) => void; // Added onLike prop
 }
-function PostFeed({posts} : FeedProps){
 
-
+function PostFeed({ posts, onLike }: FeedProps) {
     return (
         <div className="Feed">
-            {posts.map((post, index) => (
+            {posts.map((post) => (
                 <Post
-                key = {index}
-                profileImage={post.profileImage}
-                username={post.username}
-                postImage={post.postImage}
-                caption={post.caption}
-                likes={post.likes}
+                    key={post.id}
+                    id={post.id}
+                    profileImage={post.profileImage}
+                    username={post.username}
+                    postImage={post.postImage}
+                    caption={post.caption}
+                    likes={post.likes}
+                    onLike={onLike} // Pass onLike prop to Post component
                 />
-
             ))}
-
         </div>
     );
-
-
 }
 
 export default PostFeed;
