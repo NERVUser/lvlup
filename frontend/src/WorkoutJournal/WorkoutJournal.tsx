@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import {
     Button,
     Card,
@@ -47,7 +48,7 @@ const options = {
 };
 
 const WorkoutJournal: React.FC = () => {
-    const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+    const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
     const [openDialog, setOpenDialog] = useState(false);
     const [calories, setCalories] = useState<number | null>(null);
     const [time, setTime] = useState<number | null>(null);
@@ -57,6 +58,29 @@ const WorkoutJournal: React.FC = () => {
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [editIndex, setEditIndex] = useState<number | null>(null);
     const [editWorkoutDialogOpen, setEditWorkoutDialogOpen] = useState(false);
+
+    useEffect(() => {
+        const fetchWorkoutData = async () => {
+            if (selectedDate) {
+                const dateKey = selectedDate.toISOString().split('T')[0];
+                try {
+                    const response = await axios.get(`/api/workouts/${dateKey}`);
+                    if (response.data) {
+                        setCalories(response.data.calories);
+                        setTime(response.data.time);
+                        setExercises(response.data.exercises);
+                    } else {
+                        setCalories(null);
+                        setTime(null);
+                        setExercises([]);
+                    }
+                } catch (error) {
+                    console.error("Error fetching workout data:", error);
+                }
+            }
+        };
+        fetchWorkoutData();
+    }, [selectedDate]);
 
     const calorieGoal = 1000; // Set the new calorie goal for 1 loop
     const caloriePercentage = calories ? (calories >= calorieGoal ? 100 : (calories / calorieGoal) * 100) : 0;
@@ -75,9 +99,23 @@ const WorkoutJournal: React.FC = () => {
         }
     };
 
-    const handleSaveWorkout = () => {
+    const handleSaveWorkout = async () => {
         if (calories !== null && time !== null) {
             handleAddExercise();
+            const dateKey = selectedDate?.toISOString().split('T')[0];
+            if (dateKey) {
+                try {
+                    await axios.post(`/api/workouts/${dateKey}`, {
+                        date: dateKey,
+                        calories,
+                        time,
+                        exercises,
+                    });
+                    // Optionally, update the local state after saving to reflect new data
+                } catch (error) {
+                    console.error("Error saving workout data:", error);
+                }
+            }
         }
         setOpenDialog(false);
     };
@@ -114,7 +152,22 @@ const WorkoutJournal: React.FC = () => {
         setEditWorkoutDialogOpen(true);
     };
 
-    const handleSaveEditWorkout = () => {
+    const handleSaveEditWorkout = async () => {
+        if (selectedDate) {
+            const dateKey = selectedDate.toISOString().split('T')[0];
+            if (dateKey) {
+                try {
+                    await axios.post(`/api/workouts/${dateKey}`, {
+                        date: dateKey,
+                        calories: calories || 0,
+                        time: time || 0,
+                        exercises,
+                    });
+                } catch (error) {
+                    console.error("Error saving workout data:", error);
+                }
+            }
+        }
         setEditWorkoutDialogOpen(false);
     };
 
@@ -142,10 +195,15 @@ const WorkoutJournal: React.FC = () => {
             <Card>
                 <CardContent>
                     <Typography variant="h6">Exercises</Typography>
-                    <List>
+                    <List className="exercise-list">
                         {exercises.map((exercise, index) => (
                             <ListItem key={index}>
-                                <ListItemText primary={exercise.name} secondary={exercise.sets} />
+                                <ListItemText 
+                                    primary={exercise.name} 
+                                    secondary={exercise.sets} 
+                                    primaryTypographyProps={{ style: { color: '#000000' } }} 
+                                    secondaryTypographyProps={{ style: { color: '#000000' } }} 
+                                />
                                 <IconButton aria-label="edit" onClick={() => handleEditExercise(index)}>
                                     <EditIcon />
                                 </IconButton>
