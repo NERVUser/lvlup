@@ -182,7 +182,6 @@ const Feedpage = () => {
 
   return (
     <div className="Feedpage">
-      <SideNav />
       <div className="PostContainer">
         <PostFeed posts={posts} onLike={handleLikePost} />
       </div>

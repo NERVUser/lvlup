@@ -15,31 +15,30 @@ function Home() {
     }
 
 return(
-    <div className="bannerimage">
-        <img className="workingout"
-                src={workingout} 
-                alt="working out" 
-        />
-            <div className="Overlaytext">
-                TAKE CONTROL OF YOUR HEALTH
-            </div>
-
-            <div className="bannerbuttons">
-                <button className="Signup" onClick={onSignup}>Sign Up</button>
-                <button className="Login" onClick={onLogin}>Login</button>
-            </div>
-
-            <div className="Aboutus">
-                <div className="About">
-                    IT'S SIMPLE
-                </div>
-                <img className="leaderboard"
-                    src={leaderboard}
-                    alt="leaderboard" 
-                />
+  <div className="bannerimage">
+    <img className="workingout"
+      src={workingout} 
+      alt="working out" 
+    />
+    <div className="Overlaytext">
+        TAKE CONTROL OF YOUR HEALTH
     </div>
 
+    <div className="bannerbuttons">
+      <button className="Signup" onClick={onSignup}>Sign Up</button>
+      <button className="Login" onClick={onLogin}>Login</button>
     </div>
+
+    <div className="Aboutus">
+      <div className="About">
+          IT'S SIMPLE
+      </div>
+      <img className="leaderboard"
+        src={leaderboard}
+        alt="leaderboard" 
+      />
+    </div>
+  </div>
 
 
    

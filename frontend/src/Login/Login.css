@@ -38,3 +38,10 @@
     font-weight: bold;
     margin-top: 1.5rem;
 }
+
+.noAccount-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
