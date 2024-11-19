@@ -1,0 +1,13 @@
+.setup-form .MuiOutlinedInput-root {
+    border-radius: 10px;
+    border: 2px solid white;
+    color: white;
+}
+
+.setup-form .MuiOutlinedInput-root.Mui-focused {
+    border-color: blue;
+}
+
+.setup-form .MuiOutlinedInput-notchedOutline {
+    border-color: white; /* Ensures the border matches the outline */
+}

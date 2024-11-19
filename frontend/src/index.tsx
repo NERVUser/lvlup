@@ -29,7 +29,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <Home />,
+    element: <Layout><Home /></Layout>,
     errorElement: <h1 style= {{color: "white"}}> 404 Not Found </h1>
   },
   {
