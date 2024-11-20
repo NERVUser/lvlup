@@ -11,6 +11,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import AccountSetup from './AccountSetup/AccountSetup';
 import SideNav from './SideNav/SideNav';
+import GlobalProvider from './context/GlobalProvider';
 
 // Create a default MUI theme (you can customize this later if needed)
 const theme = createTheme();
@@ -65,8 +66,10 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router}/>
-    </QueryClientProvider>
+    <GlobalProvider>
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router}/>
+      </QueryClientProvider>
+    </GlobalProvider>
   </React.StrictMode>
 );

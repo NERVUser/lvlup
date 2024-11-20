@@ -3,6 +3,7 @@ import './Signup.css';
 import { TextField, Button, Typography, Box, CircularProgress } from '@mui/material';
 import { createUser } from '../lib/supabase'
 import { useNavigate } from 'react-router-dom';
+import { useGlobalContext } from '../context/GlobalProvider';
 
 function Signup() {
     const [email, setEmail] = useState('');
@@ -11,6 +12,7 @@ function Signup() {
     const [isLoading, setIsLoading] = useState(false);
 
     const navigate = useNavigate();
+    const { setUser, setIsLoggedIn } = useGlobalContext();
 
     const handleSignup = async () => {
         // Logic for signup action can be implemented here
@@ -29,8 +31,9 @@ function Signup() {
           const result = await createUser(email, password);
           if(result){
             // set our user and set is logged in to true
-            console.log('Result: ', result)
-            navigate('/AccountSetup')
+            setUser(result);
+            setIsLoggedIn(true);
+            navigate('/AccountSetup');
           }
         } catch (error) {
           console.log(error);

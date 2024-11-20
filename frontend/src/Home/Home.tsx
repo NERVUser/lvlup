@@ -2,6 +2,8 @@ import { useNavigate } from 'react-router-dom';
 import './Home.css'; 
 import workingout from '../image_assets/workingout.jpg'
 import leaderboard from  '../image_assets/leaderboard.jpg'
+import { useGlobalContext } from '../context/GlobalProvider';
+import { useEffect } from 'react';
 
 function Home() {
     const navigate = useNavigate();

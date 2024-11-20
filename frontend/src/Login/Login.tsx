@@ -3,6 +3,7 @@ import './Login.css';
 import { TextField, Button, Typography, Box, CircularProgress } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { signIn } from '../lib/supabase';
+import { useGlobalContext } from '../context/GlobalProvider';
 
 function Login() {
   const [email, setEmail] = useState('');
@@ -10,6 +11,7 @@ function Login() {
   const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
+  const { setUser, setIsLoggedIn } = useGlobalContext();
 
   const handleLogin = async () => {
     if(!email || !password)
@@ -22,6 +24,8 @@ function Login() {
 
         if(data){
           // do all this stuff
+          setUser(data);
+          setIsLoggedIn(true);
           navigate('/WorkoutJournal')
         }
       } catch (error: any) {
