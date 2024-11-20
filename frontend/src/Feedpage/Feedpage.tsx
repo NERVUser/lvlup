@@ -12,6 +12,8 @@ import {
 } from "@mui/material";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import EditIcon from "@mui/icons-material/Edit";
+import { useGlobalContext } from "../context/GlobalProvider";
+import { Navigate } from "react-router-dom";
 
 interface LeaderboardProps {
   leaderboardData: {
@@ -24,6 +26,8 @@ interface LeaderboardProps {
 }
 
 const Feedpage = () => {
+  const { isLoggedIn } = useGlobalContext();
+
   const [posts, setPosts] = useState<{ id: number; profileImage: string; username: string; postImage: string; caption: string; likes: number; }[]>([{
     id: 1,
     profileImage: "https://via.placeholder.com/150",
@@ -180,16 +184,20 @@ const Feedpage = () => {
     }
   };
 
-  return (
-    <div className="Feedpage">
-      <div className="PostContainer">
-        <PostFeed posts={posts} onLike={handleLikePost} />
+  if(!isLoggedIn)
+    return <Navigate to='/'/>
+  else {
+    return (
+      <div className="Feedpage">
+        <div className="PostContainer">
+          <PostFeed posts={posts} onLike={handleLikePost} />
+        </div>
+        <div className="LeaderBoardContainer">
+          <Leaderboard leaderboardData={leaderboardData} />
+        </div>
       </div>
-      <div className="LeaderBoardContainer">
-        <Leaderboard leaderboardData={leaderboardData} />
-      </div>
-    </div>
-  );
+    );
+  }
 };
 
 export default Feedpage;

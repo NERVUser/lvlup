@@ -4,8 +4,14 @@ import { Button, IconButton, CircularProgress, LinearProgress, Dialog, DialogTit
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
+import { Navigate } from 'react-router-dom';
+import { useGlobalContext } from '../context/GlobalProvider';
 
 function FoodJournal() {
+    // used to check if the user is logged in or not
+    const { isLoggedIn } = useGlobalContext();
+
+
     const calorieGoal = 2000;
     const carbsGoal = 300;
     const proteinGoal = 250;
@@ -147,200 +153,204 @@ function FoodJournal() {
         setFat(fat - deletedItem.fat);
     };
 
-    return (
-        <div className="food-journal-container">
-            <h1 className="header">Food Journal</h1>
-
-            {/* Calorie Summary Section */}
-            <div className="calories-summary">
-                <div className="calories-circle">
-                    <CircularProgress
-                        variant="determinate"
-                        value={Math.min(caloriePercentage, 100)}
-                        size={100}
-                        thickness={5}
-                        color={calorieIntake >= calorieGoal ? "success" : "primary"}
-                    />
-                    <div className="calorie-count" style={{ color: calorieIntake >= calorieGoal ? '#4caf50' : '#1976d2' }}>
-                        <span>{calorieIntake} Cals</span>
+    if(!isLoggedIn)
+        return <Navigate to='/' />
+    else {
+        return (
+            <div className="food-journal-container">
+                <h1 className="header">Food Journal</h1>
+    
+                {/* Calorie Summary Section */}
+                <div className="calories-summary">
+                    <div className="calories-circle">
+                        <CircularProgress
+                            variant="determinate"
+                            value={Math.min(caloriePercentage, 100)}
+                            size={100}
+                            thickness={5}
+                            color={calorieIntake >= calorieGoal ? "success" : "primary"}
+                        />
+                        <div className="calorie-count" style={{ color: calorieIntake >= calorieGoal ? '#4caf50' : '#1976d2' }}>
+                            <span>{calorieIntake} Cals</span>
+                        </div>
+                    </div>
+    
+                    <div className="macros">
+                        <p style={{ color: '#ccc' }}>Carbs</p>
+                        <LinearProgress
+                            variant="determinate"
+                            value={Math.min(carbsPercentage, 100)}
+                            color={carbs >= carbsGoal ? "success" : "primary"}
+                        />
+                        <p style={{ color: carbs >= carbsGoal ? '#4caf50' : '#1976d2' }}>{carbs}g</p>
+    
+                        <p style={{ color: '#ccc' }}>Protein</p>
+                        <LinearProgress
+                            variant="determinate"
+                            value={Math.min(proteinPercentage, 100)}
+                            color={protein >= proteinGoal ? "success" : "primary"}
+                        />
+                        <p style={{ color: protein >= proteinGoal ? '#4caf50' : '#1976d2' }}>{protein}g</p>
+    
+                        <p style={{ color: '#ccc' }}>Fat</p>
+                        <LinearProgress
+                            variant="determinate"
+                            value={Math.min(fatPercentage, 100)}
+                            color={fat >= fatGoal ? "success" : "primary"}
+                        />
+                        <p style={{ color: fat >= fatGoal ? '#4caf50' : '#1976d2' }}>{fat}g</p>
                     </div>
                 </div>
-
-                <div className="macros">
-                    <p style={{ color: '#ccc' }}>Carbs</p>
-                    <LinearProgress
-                        variant="determinate"
-                        value={Math.min(carbsPercentage, 100)}
-                        color={carbs >= carbsGoal ? "success" : "primary"}
-                    />
-                    <p style={{ color: carbs >= carbsGoal ? '#4caf50' : '#1976d2' }}>{carbs}g</p>
-
-                    <p style={{ color: '#ccc' }}>Protein</p>
-                    <LinearProgress
-                        variant="determinate"
-                        value={Math.min(proteinPercentage, 100)}
-                        color={protein >= proteinGoal ? "success" : "primary"}
-                    />
-                    <p style={{ color: protein >= proteinGoal ? '#4caf50' : '#1976d2' }}>{protein}g</p>
-
-                    <p style={{ color: '#ccc' }}>Fat</p>
-                    <LinearProgress
-                        variant="determinate"
-                        value={Math.min(fatPercentage, 100)}
-                        color={fat >= fatGoal ? "success" : "primary"}
-                    />
-                    <p style={{ color: fat >= fatGoal ? '#4caf50' : '#1976d2' }}>{fat}g</p>
-                </div>
+    
+                {/* Meal Sections */}
+                {['breakfast', 'lunch', 'dinner'].map((meal) => (
+                    <div key={meal} className="meal-section">
+                        <h2>{meal.charAt(0).toUpperCase() + meal.slice(1)}</h2>
+                        <List>
+                            {(meal === 'breakfast' ? breakfastItems : meal === 'lunch' ? lunchItems : dinnerItems).map((item, index) => (
+                                <ListItem key={index} style={{ color: '#ffffff' }}>
+                                    <ListItemText primary={item.name} secondary={`${item.quantity}, Calories: ${item.calories}, Carbs: ${item.carbs}g, Protein: ${item.protein}g, Fat: ${item.fat}g`} />
+                                    <IconButton aria-label="edit" onClick={() => handleEditFood(meal as 'breakfast' | 'lunch' | 'dinner', index)} style={{ color: '#ffffff' }}>
+                                        <EditIcon />
+                                    </IconButton>
+                                    <IconButton aria-label="delete" onClick={() => handleDeleteFood(meal as 'breakfast' | 'lunch' | 'dinner', index)} style={{ color: '#ffffff' }}>
+                                        <DeleteIcon />
+                                    </IconButton>
+                                </ListItem>
+                            ))}
+                        </List>
+                        <Button startIcon={<AddCircleOutlineIcon />} variant="contained" className="add-food-button" onClick={() => handleAddFood(meal as 'breakfast' | 'lunch' | 'dinner')}>
+                            Add Food
+                        </Button>
+                    </div>
+                ))}
+    
+                {/* Add Food Dialog */}
+                <Dialog open={openDialog} onClose={handleCloseDialog}>
+                    <DialogTitle>Add Food Item</DialogTitle>
+                    <DialogContent>
+                        <TextField
+                            label="Food Name"
+                            fullWidth
+                            margin="dense"
+                            value={foodName}
+                            onChange={(e) => setFoodName(e.target.value)}
+                        />
+                        <TextField
+                            label="Quantity (e.g., 100g, 1 cup)"
+                            fullWidth
+                            margin="dense"
+                            value={foodQuantity}
+                            placeholder="e.g., 100g, 1 cup"
+                            onChange={(e) => setFoodQuantity(e.target.value)}
+                        />
+                        <TextField
+                            label="Calories"
+                            type="number"
+                            fullWidth
+                            margin="dense"
+                            value={foodCalories || ''}
+                            onChange={(e) => setFoodCalories(Number(e.target.value))}
+                        />
+                        <TextField
+                            label="Carbs (g)"
+                            type="number"
+                            fullWidth
+                            margin="dense"
+                            value={foodCarbs || ''}
+                            onChange={(e) => setFoodCarbs(Number(e.target.value))}
+                        />
+                        <TextField
+                            label="Protein (g)"
+                            type="number"
+                            fullWidth
+                            margin="dense"
+                            value={foodProtein || ''}
+                            onChange={(e) => setFoodProtein(Number(e.target.value))}
+                        />
+                        <TextField
+                            label="Fat (g)"
+                            type="number"
+                            fullWidth
+                            margin="dense"
+                            value={foodFat || ''}
+                            onChange={(e) => setFoodFat(Number(e.target.value))}
+                        />
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleCloseDialog} color="secondary">
+                            Cancel
+                        </Button>
+                        <Button onClick={handleSaveFood} color={foodCalories && foodCalories >= 2000 ? "success" : "primary"} variant="contained">
+                            Save
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+    
+                {/* Edit Food Dialog */}
+                <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)}>
+                    <DialogTitle>Edit Food Item</DialogTitle>
+                    <DialogContent>
+                        <TextField
+                            label="Food Name"
+                            fullWidth
+                            margin="dense"
+                            value={foodName}
+                            onChange={(e) => setFoodName(e.target.value)}
+                        />
+                        <TextField
+                            label="Quantity (e.g., 100g, 1 cup)"
+                            fullWidth
+                            margin="dense"
+                            value={foodQuantity}
+                            placeholder="e.g., 100g, 1 cup"
+                            onChange={(e) => setFoodQuantity(e.target.value)}
+                        />
+                        <TextField
+                            label="Calories"
+                            type="number"
+                            fullWidth
+                            margin="dense"
+                            value={foodCalories || ''}
+                            onChange={(e) => setFoodCalories(Number(e.target.value))}
+                        />
+                        <TextField
+                            label="Carbs (g)"
+                            type="number"
+                            fullWidth
+                            margin="dense"
+                            value={foodCarbs || ''}
+                            onChange={(e) => setFoodCarbs(Number(e.target.value))}
+                        />
+                        <TextField
+                            label="Protein (g)"
+                            type="number"
+                            fullWidth
+                            margin="dense"
+                            value={foodProtein || ''}
+                            onChange={(e) => setFoodProtein(Number(e.target.value))}
+                        />
+                        <TextField
+                            label="Fat (g)"
+                            type="number"
+                            fullWidth
+                            margin="dense"
+                            value={foodFat || ''}
+                            onChange={(e) => setFoodFat(Number(e.target.value))}
+                        />
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setEditDialogOpen(false)} color="secondary">
+                            Cancel
+                        </Button>
+                        <Button onClick={handleSaveEditFood} color={foodCalories && foodCalories >= 2000 ? "success" : "primary"} variant="contained">
+                            Save Changes
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </div>
-
-            {/* Meal Sections */}
-            {['breakfast', 'lunch', 'dinner'].map((meal) => (
-                <div key={meal} className="meal-section">
-                    <h2>{meal.charAt(0).toUpperCase() + meal.slice(1)}</h2>
-                    <List>
-                        {(meal === 'breakfast' ? breakfastItems : meal === 'lunch' ? lunchItems : dinnerItems).map((item, index) => (
-                            <ListItem key={index} style={{ color: '#ffffff' }}>
-                                <ListItemText primary={item.name} secondary={`${item.quantity}, Calories: ${item.calories}, Carbs: ${item.carbs}g, Protein: ${item.protein}g, Fat: ${item.fat}g`} />
-                                <IconButton aria-label="edit" onClick={() => handleEditFood(meal as 'breakfast' | 'lunch' | 'dinner', index)} style={{ color: '#ffffff' }}>
-                                    <EditIcon />
-                                </IconButton>
-                                <IconButton aria-label="delete" onClick={() => handleDeleteFood(meal as 'breakfast' | 'lunch' | 'dinner', index)} style={{ color: '#ffffff' }}>
-                                    <DeleteIcon />
-                                </IconButton>
-                            </ListItem>
-                        ))}
-                    </List>
-                    <Button startIcon={<AddCircleOutlineIcon />} variant="contained" className="add-food-button" onClick={() => handleAddFood(meal as 'breakfast' | 'lunch' | 'dinner')}>
-                        Add Food
-                    </Button>
-                </div>
-            ))}
-
-            {/* Add Food Dialog */}
-            <Dialog open={openDialog} onClose={handleCloseDialog}>
-                <DialogTitle>Add Food Item</DialogTitle>
-                <DialogContent>
-                    <TextField
-                        label="Food Name"
-                        fullWidth
-                        margin="dense"
-                        value={foodName}
-                        onChange={(e) => setFoodName(e.target.value)}
-                    />
-                    <TextField
-                        label="Quantity (e.g., 100g, 1 cup)"
-                        fullWidth
-                        margin="dense"
-                        value={foodQuantity}
-                        placeholder="e.g., 100g, 1 cup"
-                        onChange={(e) => setFoodQuantity(e.target.value)}
-                    />
-                    <TextField
-                        label="Calories"
-                        type="number"
-                        fullWidth
-                        margin="dense"
-                        value={foodCalories || ''}
-                        onChange={(e) => setFoodCalories(Number(e.target.value))}
-                    />
-                    <TextField
-                        label="Carbs (g)"
-                        type="number"
-                        fullWidth
-                        margin="dense"
-                        value={foodCarbs || ''}
-                        onChange={(e) => setFoodCarbs(Number(e.target.value))}
-                    />
-                    <TextField
-                        label="Protein (g)"
-                        type="number"
-                        fullWidth
-                        margin="dense"
-                        value={foodProtein || ''}
-                        onChange={(e) => setFoodProtein(Number(e.target.value))}
-                    />
-                    <TextField
-                        label="Fat (g)"
-                        type="number"
-                        fullWidth
-                        margin="dense"
-                        value={foodFat || ''}
-                        onChange={(e) => setFoodFat(Number(e.target.value))}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleCloseDialog} color="secondary">
-                        Cancel
-                    </Button>
-                    <Button onClick={handleSaveFood} color={foodCalories && foodCalories >= 2000 ? "success" : "primary"} variant="contained">
-                        Save
-                    </Button>
-                </DialogActions>
-            </Dialog>
-
-            {/* Edit Food Dialog */}
-            <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)}>
-                <DialogTitle>Edit Food Item</DialogTitle>
-                <DialogContent>
-                    <TextField
-                        label="Food Name"
-                        fullWidth
-                        margin="dense"
-                        value={foodName}
-                        onChange={(e) => setFoodName(e.target.value)}
-                    />
-                    <TextField
-                        label="Quantity (e.g., 100g, 1 cup)"
-                        fullWidth
-                        margin="dense"
-                        value={foodQuantity}
-                        placeholder="e.g., 100g, 1 cup"
-                        onChange={(e) => setFoodQuantity(e.target.value)}
-                    />
-                    <TextField
-                        label="Calories"
-                        type="number"
-                        fullWidth
-                        margin="dense"
-                        value={foodCalories || ''}
-                        onChange={(e) => setFoodCalories(Number(e.target.value))}
-                    />
-                    <TextField
-                        label="Carbs (g)"
-                        type="number"
-                        fullWidth
-                        margin="dense"
-                        value={foodCarbs || ''}
-                        onChange={(e) => setFoodCarbs(Number(e.target.value))}
-                    />
-                    <TextField
-                        label="Protein (g)"
-                        type="number"
-                        fullWidth
-                        margin="dense"
-                        value={foodProtein || ''}
-                        onChange={(e) => setFoodProtein(Number(e.target.value))}
-                    />
-                    <TextField
-                        label="Fat (g)"
-                        type="number"
-                        fullWidth
-                        margin="dense"
-                        value={foodFat || ''}
-                        onChange={(e) => setFoodFat(Number(e.target.value))}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setEditDialogOpen(false)} color="secondary">
-                        Cancel
-                    </Button>
-                    <Button onClick={handleSaveEditFood} color={foodCalories && foodCalories >= 2000 ? "success" : "primary"} variant="contained">
-                        Save Changes
-                    </Button>
-                </DialogActions>
-            </Dialog>
-        </div>
-    );
+        );
+    }
 }
 
 export default FoodJournal;
