@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { supabase } from '../lib/supabase';
 
 //Define the type for user info
 interface UserInfo {
@@ -19,17 +20,51 @@ interface AppContextState {
   setIsLoggedIn: (isLoggedIn: boolean) => void;
   isLoading: boolean;
   setIsLoading: (isLoading: boolean) => void;
-  session: any | null; // Define a more specific type if you know the shape of the session object
-  setSession: (session: any | null) => void;
+  // session: any | null; // Define a more specific type if you know the shape of the session object
+  // setSession: (session: any | null) => void;
 }
 
+// create our context
 const GlobalContext = createContext<AppContextState | undefined>(undefined);
 
 export const GlobalProvider = ({children}:{children:JSX.Element}) => {
   const [user, setUser] = useState<UserInfo | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [session, setSession] = useState(false);
+  // const [session, setSession] = useState(false);
+
+  // get our current user if there is one logged in already
+  const fetchSession = async () => {
+    setIsLoading(true);
+    const { data: { session } } = await supabase.auth.getSession();
+
+    console.log('Session: ', session)
+
+    if(session){
+      // setSession(session);
+      console.log('Hi')
+      setIsLoggedIn(true);
+
+      const { data: userData, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', session.user.id)
+        .single();
+
+      if(error)
+        return alert(error.message);
+
+      setUser(userData || null);
+    }
+    setIsLoading(false);
+  }
+
+  //each time we load app, see if user is logged in
+  useEffect(() => {
+    console.log('Called')
+    fetchSession();
+    console.log('User logged in:', isLoggedIn ? 'Yes' : 'No');
+  }, [])
 
   return (
     <GlobalContext.Provider 
@@ -37,7 +72,6 @@ export const GlobalProvider = ({children}:{children:JSX.Element}) => {
         user, setUser,
         isLoggedIn, setIsLoggedIn,
         isLoading, setIsLoading,
-        session, setSession
       }}
     >
         {children}
