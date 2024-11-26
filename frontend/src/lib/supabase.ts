@@ -87,6 +87,7 @@ export const useUpdateUser = () => {
         .from('profiles')
         .update({
           full_name: data.full_name,
+          username: data.username,
           avatar_url: data.avatar_url,
           bio: data.bio,
           fitness_level: data.fitness_level,
