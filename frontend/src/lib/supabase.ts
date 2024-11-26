@@ -62,7 +62,7 @@ export const logOut = async () => {
 }
 
 // used to get our user's data in a query
-export const getUserQuery = async (type: string, id: number) => ({
+export const useGetUserQuery = async (type: string, id: number) => ({
   queryKey: ['profiles', id],
   queryFn: async () => {
     const { data, error } = await supabase
@@ -77,12 +77,13 @@ export const getUserQuery = async (type: string, id: number) => ({
   }
 })
 
-// //update our user
+//update our user
 export const useUpdateUser = () => {
   const queryClient = useQueryClient();
 
   return useMutation<UpdateUserData, Error, UpdateUserData>({
     mutationFn: async (data: UpdateUserData) => {
+      //first we need to update the profiles table for the user
       const { error, data: updatedUser } = await supabase
         .from('profiles')
         .update({
@@ -97,6 +98,14 @@ export const useUpdateUser = () => {
         .select()
         .single();
       
+      // now we need to update the weight table for the user
+      const { error: weightError, data: userWeights } = await supabase
+        .from('weights')
+        .insert({
+          weight: data.weight,
+          user_id: data.id
+        })
+      
       if(error)
         throw new Error(error.message);
       return updatedUser;
@@ -106,8 +115,28 @@ export const useUpdateUser = () => {
       queryClient.setQueryData(['profiles', id], updatedUser);
 
       // invalidate queries to ensure fresh data fetch
+      // do this for user data and their weight data
       queryClient.invalidateQueries({ queryKey: ['profiles', id] });
+      queryClient.invalidateQueries({ queryKey: ['profileWeights', id] });
 
     }
   })
 }
+
+// get all our weights given a userId
+export const useGetUserWeights = (id: string | undefined) => {
+  return useQuery({
+    queryKey: ['profileWeights', id],
+    queryFn: async () => {
+      const { error, data } = await supabase
+        .from('weights')
+        .select('*')
+        .eq('user_id', id);
+
+      if(error)
+        throw new Error(error.message);
+      return data;
+    }
+  })
+}
+

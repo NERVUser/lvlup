@@ -74,8 +74,8 @@ function AccountSetup() {
         username: form.username,
         age: form.age,
         bio: form.bio,
-        fitness_level: form.fitness_level
-  
+        fitness_level: form.fitness_level,
+        weight: form.weight
       }, {
         onError: () => {
           throw Error("Username already exists");

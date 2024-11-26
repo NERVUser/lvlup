@@ -24,6 +24,8 @@ import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import './WorkoutJournal.css';
+import { useGetUserWeights } from '../lib/supabase';
+import { useGlobalContext } from '../context/GlobalProvider';
 
 // Register chart components
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
@@ -59,7 +61,9 @@ const WorkoutJournal = () => {
     const [editIndex, setEditIndex] = useState<number | null>(null);
     const [editWorkoutDialogOpen, setEditWorkoutDialogOpen] = useState(false);
 
-    // const { data: }
+    // grab our user, and then using his id, get all weights on the backend associated with that user
+    const { user } = useGlobalContext();
+    const { data: userWeights } = useGetUserWeights(user?.id);
 
     useEffect(() => {
         const fetchWorkoutData = async () => {

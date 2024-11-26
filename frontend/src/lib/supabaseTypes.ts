@@ -3,8 +3,9 @@ export interface UpdateUserData {
     id: string | undefined;
     full_name?: string;
     username?: string;
-    age?: Number;
+    age: Number;
     avatar_url?: string;
     bio?: string;
     fitness_level?: Number;
+    weight: Number;
   }
