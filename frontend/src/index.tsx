@@ -1,13 +1,13 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { createBrowserRouter, RouterProvider, BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Signup from './Singup/Signup';
 import Login from './Login/Login';
 import Home from './Home/Home';
 import Feedpage from './Feedpage/Feedpage'
 import WorkoutJournal from './WorkoutJournal/WorkoutJournal'
 import FoodJournal from './FoodJournal/FoodJournal'
-import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { createTheme } from '@mui/material/styles';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import AccountSetup from './AccountSetup/AccountSetup';
 import SideNav from './SideNav/SideNav';
@@ -43,16 +43,16 @@ root.render(
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <Routes>
-            <Route element={<Layout><Home /></Layout>} path='/'/>
-            <Route element={<Login />} path='/Login' />
-            <Route element={<Signup />} path='/Signup' />
+            <Route element={<Home />} path='/'/>
+            <Route element={<Login />} path='/login' />
+            <Route element={<Signup />} path='/signup' />
 
             <Route element={<PrivateRoutes />}>
-              <Route element={<Layout><Feedpage /></Layout>} path='/Feedpage' />
-              <Route element={<Layout><WorkoutJournal /></Layout>} path='/WorkoutJournal' />
-              <Route element={<Layout><FoodJournal /></Layout>} path='/FoodJournal' />
-              <Route element={<Layout><AccountSetup /></Layout>} path='/AccountSetup' />
-              <Route element={<Layout><RecommendationsPage /></Layout>} path='/Recommendations' />
+              <Route element={<Layout><Feedpage /></Layout>} path='/feedpage' />
+              <Route element={<Layout><WorkoutJournal /></Layout>} path='/workoutjournal' />
+              <Route element={<Layout><FoodJournal /></Layout>} path='/foodjournal' />
+              <Route element={<Layout><AccountSetup /></Layout>} path='/accountsetup' />
+              <Route element={<Layout><RecommendationsPage /></Layout>} path='/recommendations' />
             </Route>
           </Routes>
         </BrowserRouter>
