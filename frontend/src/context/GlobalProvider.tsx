@@ -30,7 +30,7 @@ const GlobalContext = createContext<AppContextState | undefined>(undefined);
 export const GlobalProvider = ({children}:{children:JSX.Element}) => {
   const [user, setUser] = useState<UserInfo | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   // const [session, setSession] = useState(false);
 
   // get our current user if there is one logged in already
@@ -42,7 +42,6 @@ export const GlobalProvider = ({children}:{children:JSX.Element}) => {
 
     if(session){
       // setSession(session);
-      console.log('Hi')
       setIsLoggedIn(true);
 
       const { data: userData, error } = await supabase
@@ -61,10 +60,8 @@ export const GlobalProvider = ({children}:{children:JSX.Element}) => {
 
   //each time we load app, see if user is logged in
   useEffect(() => {
-    console.log('Called')
     fetchSession();
-    console.log('User logged in:', isLoggedIn ? 'Yes' : 'No');
-  }, [])
+  }, []);
 
   return (
     <GlobalContext.Provider 
