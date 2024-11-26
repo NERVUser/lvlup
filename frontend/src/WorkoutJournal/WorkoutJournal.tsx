@@ -59,6 +59,8 @@ const WorkoutJournal = () => {
     const [editIndex, setEditIndex] = useState<number | null>(null);
     const [editWorkoutDialogOpen, setEditWorkoutDialogOpen] = useState(false);
 
+    // const { data: }
+
     useEffect(() => {
         const fetchWorkoutData = async () => {
             if (selectedDate) {
@@ -225,151 +227,151 @@ const WorkoutJournal = () => {
                 </CardContent>
             </Card>
 
-                {/* Bottom-Right: Calories and Time */}
-                <Card>
-                    <CardContent style={{ textAlign: 'center' }}>
-                        <Typography variant="h6">Today's Workout</Typography>
-                        <div style={{ position: 'relative', display: 'inline-flex' }}>
-                            <CircularProgress
-                                variant="determinate"
-                                value={caloriePercentage}
-                                size={100}
-                                thickness={5}
-                                color={progressColor}
-                            />
-                            <div style={{
-                                position: 'absolute',
-                                top: 0,
-                                left: 0,
-                                bottom: 0,
-                                right: 0,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                flexDirection: 'column'
-                            }}>
-                                <Typography variant="h5">{calories !== null ? calories : 0}</Typography>
-                                <Typography variant="caption">Calories</Typography>
-                            </div>
+            {/* Bottom-Right: Calories and Time */}
+            <Card>
+                <CardContent style={{ textAlign: 'center' }}>
+                    <Typography variant="h6">Today's Workout</Typography>
+                    <div style={{ position: 'relative', display: 'inline-flex' }}>
+                        <CircularProgress
+                            variant="determinate"
+                            value={caloriePercentage}
+                            size={100}
+                            thickness={5}
+                            color={progressColor}
+                        />
+                        <div style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            bottom: 0,
+                            right: 0,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            flexDirection: 'column'
+                        }}>
+                            <Typography variant="h5">{calories !== null ? calories : 0}</Typography>
+                            <Typography variant="caption">Calories</Typography>
                         </div>
-                        <div style={{ marginTop: '20px' }}>
-                            <Typography variant="h5">{time !== null ? time : 0} Minutes</Typography>
-                        </div>
-                        {calories !== null && time !== null && (
-                            <IconButton aria-label="edit" onClick={handleEditWorkout} style={{ marginTop: '10px' }}>
-                                <EditIcon />
-                            </IconButton>
-                        )}
-                    </CardContent>
-                </Card>
+                    </div>
+                    <div style={{ marginTop: '20px' }}>
+                        <Typography variant="h5">{time !== null ? time : 0} Minutes</Typography>
+                    </div>
+                    {calories !== null && time !== null && (
+                        <IconButton aria-label="edit" onClick={handleEditWorkout} style={{ marginTop: '10px' }}>
+                            <EditIcon />
+                        </IconButton>
+                    )}
+                </CardContent>
+            </Card>
 
-                {/* Workout Dialog */}
-                <Dialog open={openDialog} onClose={handleCloseDialog}>
-                    <DialogTitle>Add Workout Details</DialogTitle>
-                    <DialogContent>
-                        <TextField
-                            label="Calories Burned"
-                            type="number"
-                            fullWidth
-                            margin="dense"
-                            value={calories !== null ? calories : ''}
-                            onChange={(e) => setCalories(Number(e.target.value))}
-                        />
-                        <TextField
-                            label="Time Spent (minutes)"
-                            type="number"
-                            fullWidth
-                            margin="dense"
-                            value={time !== null ? time : ''}
-                            onChange={(e) => setTime(Number(e.target.value))}
-                        />
-                        <TextField
-                            label="Exercise Name"
-                            fullWidth
-                            margin="dense"
-                            value={exerciseName}
-                            onChange={(e) => setExerciseName(e.target.value)}
-                        />
-                        <TextField
-                            label="Sets (e.g., 3x10)"
-                            fullWidth
-                            margin="dense"
-                            value={exerciseSets}
-                            onChange={(e) => setExerciseSets(e.target.value)}
-                        />
-                        <Button onClick={handleAddExercise} variant="outlined" color="primary" style={{ marginTop: '10px' }}>
-                            Add Exercise
-                        </Button>
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={handleCloseDialog} color="secondary">
-                            Cancel
-                        </Button>
-                        <Button onClick={handleSaveWorkout} color="primary" variant="contained">
-                            Save Workout
-                        </Button>
-                    </DialogActions>
-                </Dialog>
+            {/* Workout Dialog */}
+            <Dialog open={openDialog} onClose={handleCloseDialog}>
+                <DialogTitle>Add Workout Details</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        label="Calories Burned"
+                        type="number"
+                        fullWidth
+                        margin="dense"
+                        value={calories !== null ? calories : ''}
+                        onChange={(e) => setCalories(Number(e.target.value))}
+                    />
+                    <TextField
+                        label="Time Spent (minutes)"
+                        type="number"
+                        fullWidth
+                        margin="dense"
+                        value={time !== null ? time : ''}
+                        onChange={(e) => setTime(Number(e.target.value))}
+                    />
+                    <TextField
+                        label="Exercise Name"
+                        fullWidth
+                        margin="dense"
+                        value={exerciseName}
+                        onChange={(e) => setExerciseName(e.target.value)}
+                    />
+                    <TextField
+                        label="Sets (e.g., 3x10)"
+                        fullWidth
+                        margin="dense"
+                        value={exerciseSets}
+                        onChange={(e) => setExerciseSets(e.target.value)}
+                    />
+                    <Button onClick={handleAddExercise} variant="outlined" color="primary" style={{ marginTop: '10px' }}>
+                        Add Exercise
+                    </Button>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseDialog} color="secondary">
+                        Cancel
+                    </Button>
+                    <Button onClick={handleSaveWorkout} color="primary" variant="contained">
+                        Save Workout
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
-                {/* Edit Exercise Dialog */}
-                <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)}>
-                    <DialogTitle>Edit Exercise</DialogTitle>
-                    <DialogContent>
-                        <TextField
-                            label="Exercise Name"
-                            fullWidth
-                            margin="dense"
-                            value={exerciseName}
-                            onChange={(e) => setExerciseName(e.target.value)}
-                        />
-                        <TextField
-                            label="Sets (e.g., 3x10)"
-                            fullWidth
-                            margin="dense"
-                            value={exerciseSets}
-                            onChange={(e) => setExerciseSets(e.target.value)}
-                        />
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={() => setEditDialogOpen(false)} color="secondary">
-                            Cancel
-                        </Button>
-                        <Button onClick={handleSaveEditExercise} color="primary" variant="contained">
-                            Save Changes
-                        </Button>
-                    </DialogActions>
-                </Dialog>
+            {/* Edit Exercise Dialog */}
+            <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)}>
+                <DialogTitle>Edit Exercise</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        label="Exercise Name"
+                        fullWidth
+                        margin="dense"
+                        value={exerciseName}
+                        onChange={(e) => setExerciseName(e.target.value)}
+                    />
+                    <TextField
+                        label="Sets (e.g., 3x10)"
+                        fullWidth
+                        margin="dense"
+                        value={exerciseSets}
+                        onChange={(e) => setExerciseSets(e.target.value)}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setEditDialogOpen(false)} color="secondary">
+                        Cancel
+                    </Button>
+                    <Button onClick={handleSaveEditExercise} color="primary" variant="contained">
+                        Save Changes
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
-                {/* Edit Workout Dialog */}
-                <Dialog open={editWorkoutDialogOpen} onClose={() => setEditWorkoutDialogOpen(false)}>
-                    <DialogTitle>Edit Today's Workout</DialogTitle>
-                    <DialogContent>
-                        <TextField
-                            label="Calories Burned"
-                            type="number"
-                            fullWidth
-                            margin="dense"
-                            value={calories !== null ? calories : ''}
-                            onChange={(e) => setCalories(Number(e.target.value))}
-                        />
-                        <TextField
-                            label="Time Spent (minutes)"
-                            type="number"
-                            fullWidth
-                            margin="dense"
-                            value={time !== null ? time : ''}
-                            onChange={(e) => setTime(Number(e.target.value))}
-                        />
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={() => setEditWorkoutDialogOpen(false)} color="secondary">
-                            Cancel
-                        </Button>
-                        <Button onClick={handleSaveEditWorkout} color="primary" variant="contained">
-                            Save Changes
-                        </Button>
-                    </DialogActions>
-                </Dialog>
+            {/* Edit Workout Dialog */}
+            <Dialog open={editWorkoutDialogOpen} onClose={() => setEditWorkoutDialogOpen(false)}>
+                <DialogTitle>Edit Today's Workout</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        label="Calories Burned"
+                        type="number"
+                        fullWidth
+                        margin="dense"
+                        value={calories !== null ? calories : ''}
+                        onChange={(e) => setCalories(Number(e.target.value))}
+                    />
+                    <TextField
+                        label="Time Spent (minutes)"
+                        type="number"
+                        fullWidth
+                        margin="dense"
+                        value={time !== null ? time : ''}
+                        onChange={(e) => setTime(Number(e.target.value))}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setEditWorkoutDialogOpen(false)} color="secondary">
+                        Cancel
+                    </Button>
+                    <Button onClick={handleSaveEditWorkout} color="primary" variant="contained">
+                        Save Changes
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </div>
     );
 };
