@@ -1,82 +1,92 @@
-body{
+body {
     background-color: black;
 }
 
-
-.bannerimage{
-    margin-top: 80px;
-    display: flex;                
-    flex-direction: column;      
-    align-items: center;          
-    text-align: center; 
-    overflow: hidden;
-    
-}
-
-.workingout{
-    top: 20%;
-    max-width: 75%; 
-    height: auto; 
-    border-radius: 15px;
-}
-
-.Overlaytext{
-    position: absolute;
-    top: 80%;
-    left: 20%;
-    font-size: 40px;
-    font-weight: bold;
-    color: white;
-}
-
-.bannerbuttons{
-    position: absolute;
-    bottom: 7%;
-    left: 20%;
+#home {
     display: flex;
-    gap: 10px;
-}
-.Signup{
-    background-color: lightskyblue;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    padding: 10px 30px;
-    outline: none;
-}
-.Login{
-    background-color: lightskyblue;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
-    padding: 10px 30px;
-    outline: none;
-}
-
-.Aboutus{
-    margin-top: 80px;
-    display: flex;                
-    flex-direction: column;      
-    align-items: center;          
-    text-align: center; 
-    overflow: hidden;
-    
-}
-
-.leaderboard{
-    top: 10%;
-    max-width: 30%; 
-    height: auto; 
-    border-radius: 15px;
-    margin-left: 650px;
-
-}
-
-.About{
-    position: relative;
-    top: 5%;
-    right: 20%;
-    font-size: 40px;
-    font-weight: bold;
+    flex-direction: column;
+    margin-top: 5vw;
+    margin-bottom: 5vw;
+    margin-left: 5vw;
+    margin-right: 5vw;
     color: white;
+    font-weight: bold;
+}
+
+#home img {
+    border-radius: 5vw;
+}
+
+#sub-field-1 {
+    position: relative;
+    display: flex;
+}
+
+#sub-field-1 img {
+    width: 100%;
+}
+
+#sub-field-1 p {
+    position: absolute;
+    padding-top: 18%;
+    padding-left: 10%;
+    font-size: 7vw;
+}
+
+#sub-field-1 div {
+    position: absolute;
+    margin-top: 48%;
+    margin-left: 10%;
+    display: flex;
+    flex-direction: row;
+    gap: 2vw;
+}
+
+#sub-field-1 button {
+    background-color: lightskyblue;
+    border: none;
+    border-radius: 3vh;
+    cursor: pointer;
+    padding: 10% 30%;
+    outline: none;
+    font-size: 2vh;
+}
+
+#sub-field-2 {
+    margin-top: 6vh;
+    display: flex;
+    flex-direction: row;
+    gap: 15%;
+}
+
+#sub-field-2 img {
+    width: 50%;
+}
+
+#sub-field-3 {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+    max-width: 100vw;
+    gap: 2vh;
+}
+
+#sub-field-3 img {
+    width: 41vh;
+    object-fit: cover;
+}
+
+.sub-field-3-1 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+@media (max-width: 100%) {
+    #sub-field-3 {
+        flex-direction: column;
+    }
 }
