@@ -13,3 +13,69 @@
 .actual_recommendation {
     font: 10px;
 }
+*/
+
+.recommendations-container {
+    margin-top: 2rem;
+    padding: 2rem;
+    background-color: #2d2d2d; /
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    color: #f0f0f0; 
+  }
+  
+  .title {
+    color: #ffeb3b; 
+    font-weight: bold;
+  }
+  
+  .card {
+    background-color: #424242; 
+    transition: transform 0.3s, background-color 0.3s;
+    color: #f0f0f0;
+  }
+  
+  .card:hover {
+    transform: scale(1.05);
+  }
+  
+  .selected {
+    background-color: #616161; 
+  }
+  
+  .get-recommendations-button {
+    margin-top: 2rem;
+    background-color: #007bff;
+    color: #ffffff;
+    font-weight: bold;
+  }
+  
+  .get-recommendations-button:hover {
+    background-color: #0056b3;
+  }
+  
+  .recommendations-list {
+    margin-top: 2rem;
+    padding: 1rem;
+    background-color: #3e3e3e;
+    border-radius: 8px;
+  }
+  
+  .subtitle {
+    color: #ffeb3b; 
+    font-weight: bold;
+  }
+  
+  ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  li {
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+    background-color: #4e4e4e;
+    border-radius: 4px;
+    color: #f0f0f0;
+  }
+  
