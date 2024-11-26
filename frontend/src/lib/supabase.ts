@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { UpdateUserData } from './supabaseTypes';
 
 const supabaseUrl = 'https://tlssadzfzfxcufxvijlt.supabase.co'
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRsc3NhZHpmemZ4Y3VmeHZpamx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzEzNzEzODcsImV4cCI6MjA0Njk0NzM4N30.UNXzMbLvruACs5RdXp_Vy9N5ZPKkASbZlb41KnpcUu0';
@@ -77,28 +78,35 @@ export const getUserQuery = async (type: string, id: number) => ({
 })
 
 // //update our user
-// export const useUpdateUser = () => {
-//   const queryClient = useQueryClient();
+export const useUpdateUser = () => {
+  const queryClient = useQueryClient();
 
-//   return useMutation({
-//     async mutationFn(data) {
-//       const { error, data: updatedUser } = await supabase
-//         .from('profiles')
-//         .update({
-//           full_name: data.full_name,
-//           avatar_url: data.avatar_url,
-//           bio: data.bio,
-//           fitness_level: data.fitness_level
-//         })
-//         .eq('id', data.id)
-//         .select()
-//         .single();
+  return useMutation<UpdateUserData, Error, UpdateUserData>({
+    mutationFn: async (data: UpdateUserData) => {
+      const { error, data: updatedUser } = await supabase
+        .from('profiles')
+        .update({
+          full_name: data.full_name,
+          avatar_url: data.avatar_url,
+          bio: data.bio,
+          fitness_level: data.fitness_level,
+          age: data.age
+        })
+        .eq('id', data.id)
+        .select()
+        .single();
       
-//       if(error)
-//         throw new Error(error.message);
-//     },
-//     async onSuccess(_, { id }) {
-//       queryClient.invalidateQueries(['profiles', id]);
-//     }
-//   })
-// }
+      if(error)
+        throw new Error(error.message);
+      return updatedUser;
+    },
+    async onSuccess(updatedUser, { id }) {
+      // Optimistically update the cache if needed
+      queryClient.setQueryData(['profiles', id], updatedUser);
+
+      // invalidate queries to ensure fresh data fetch
+      queryClient.invalidateQueries({ queryKey: ['profiles', id] });
+
+    }
+  })
+}

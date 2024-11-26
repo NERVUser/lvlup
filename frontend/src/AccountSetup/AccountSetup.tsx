@@ -3,23 +3,25 @@ import { useEffect, useState } from 'react';
 import { createTheme, ThemeProvider } from '@mui/material';
 import './AccountSetup.css'
 import React from 'react';
+import { useUpdateUser } from '../lib/supabase';
 import { useGlobalContext } from '../context/GlobalProvider';
-import { Navigate } from 'react-router-dom';
 
 interface SetupFormProps {
   title: string;
   placeholder: string;
   value: string | number | null;
+  type: string | undefined;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 // used for our different forms
-const SetupForm: React.FC<SetupFormProps> = ({title, placeholder, value, onChange }) => (
+const SetupForm: React.FC<SetupFormProps> = ({title, placeholder, value, onChange, type }) => (
   <Box>
     <Typography variant='h6'>
       {title}
     </Typography>
     <TextField 
+      type={type}
       value={value}
       onChange={onChange}
       margin='normal'
@@ -35,11 +37,13 @@ function AccountSetup() {
   const [form, setForm] = useState({
     name: '',
     username: '',
+    bio: '',
     age: 0,
     weight: 0,
     fitness_level: 0
   });
-  const { isLoggedIn } = useGlobalContext();
+  const { user } = useGlobalContext();
+  const { mutate: updateUser } = useUpdateUser();
 
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -51,6 +55,22 @@ function AccountSetup() {
   const updateFitnessLevel = (new_level: number) => {
     setForm({...form, fitness_level: new_level});
     handleClose();
+  };
+
+  const hanldeUpdateUser = () => {
+    updateUser({
+      id: user?.id,
+      full_name: form.name,
+      username: form.username,
+      age: form.age,
+      bio: form.bio,
+      fitness_level: form.fitness_level
+
+    }, {
+      onError: () => {
+        alert("Username already exists");
+      }
+    })
   }
   return (
     <Box sx={{ width: 500 }}>
@@ -60,24 +80,35 @@ function AccountSetup() {
           value={form.name}
           placeholder='Enter name'
           onChange={(e) => setForm({...form, name: e.target.value})}
+          type='text'
         />
         <SetupForm
           title='What username do you want?'
           value={form.username}
           placeholder='Enter username'
           onChange={(e) => setForm({...form, username: e.target.value})}
+          type='text'
         />
         <SetupForm
           title='What is your age?'
           value={form.age}
           placeholder='Enter age'
           onChange={(e) => setForm({...form, age: parseInt(e.target.value)})}
+          type='number'
         />
         <SetupForm
           title='What is your weight?'
           value={form.weight}
           placeholder='Enter weight'
           onChange={(e) => setForm({...form, weight: parseFloat(e.target.value)})}
+          type='number'
+        />
+        <SetupForm
+          title='Finally, tell use a little about yourself'
+          value={form.bio}
+          placeholder='Enter username'
+          onChange={(e) => setForm({...form, bio: e.target.value})}
+          type='text'
         />
       </Box>
       <Box>

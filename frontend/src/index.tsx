@@ -13,6 +13,7 @@ import AccountSetup from './AccountSetup/AccountSetup';
 import SideNav from './SideNav/SideNav';
 import PrivateRoutes from './utils/PrivateRoutes';
 import GlobalProvider from './context/GlobalProvider';
+import RecommendationsPage from './Recommendations/Recommendations';
 
 // Create a default MUI theme (you can customize this later if needed)
 const theme = createTheme();
@@ -51,6 +52,7 @@ root.render(
               <Route element={<Layout><WorkoutJournal /></Layout>} path='/WorkoutJournal' />
               <Route element={<Layout><FoodJournal /></Layout>} path='/FoodJournal' />
               <Route element={<Layout><AccountSetup /></Layout>} path='/AccountSetup' />
+              <Route element={<Layout><RecommendationsPage /></Layout>} path='/Recommendations' />
             </Route>
           </Routes>
         </BrowserRouter>
