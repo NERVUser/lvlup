@@ -20,34 +20,28 @@ import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { DateCalendar } from '@mui/x-date-pickers';
 import { Line } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ChartData, ChartOptions } from 'chart.js';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import './WorkoutJournal.css';
 import { useGetUserWeights } from '../lib/supabase';
 import { useGlobalContext } from '../context/GlobalProvider';
+import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval, parseISO, format } from 'date-fns';
+
+interface UserWeight {
+    id: number;
+    created_at: string;
+    weight: number;
+    user_id: string;
+}
+
+type WeeklyDataPoint = {
+  dayOfWeek: string;
+  avgWeight: number;
+};
 
 // Register chart components
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
-
-const data = {
-    labels: ['1 Month Ago', '3 Weeks Ago', '2 Weeks Ago', '1 Week Ago', 'Today'],
-    datasets: [{
-        label: 'Weight',
-        data: [180, 175, 178, 173, 170],
-        fill: false,
-        borderColor: 'rgba(75,192,192,1)',
-        backgroundColor: 'rgba(75,192,192,0.4)',
-    }],
-};
-
-const options = {
-    responsive: true,
-    plugins: {
-        legend: { position: 'top' as const },
-        title: { display: true, text: 'Weight' },
-    },
-};
 
 const WorkoutJournal = () => {
     const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
@@ -63,7 +57,16 @@ const WorkoutJournal = () => {
 
     // grab our user, and then using his id, get all weights on the backend associated with that user
     const { user } = useGlobalContext();
-    const { data: userWeights } = useGetUserWeights(user?.id);
+    const { data: userWeights } = useGetUserWeights(user?.id) as { data: UserWeight[] | undefined};
+    // const [monthlyData, setMonthlyData] = useState<WeeklyDataPoint[]>(null);
+
+
+    useEffect(() => {
+      if(userWeights) {
+        const monthlyData = filterDataForCurrentMonth(userWeights);
+        // setMonthlyData(monthlyData);
+      }
+    }, [userWeights]);
 
     useEffect(() => {
         const fetchWorkoutData = async () => {
@@ -91,6 +94,7 @@ const WorkoutJournal = () => {
     const calorieGoal = 1000; // Set the new calorie goal for 1 loop
     const caloriePercentage = calories ? (calories >= calorieGoal ? 100 : (calories / calorieGoal) * 100) : 0;
     const progressColor = calories && calories >= calorieGoal ? 'success' : 'primary';
+    
 
     const handleAddWorkout = () => setOpenDialog(true);
     const handleCloseDialog = () => {
@@ -176,6 +180,144 @@ const WorkoutJournal = () => {
         }
         setEditWorkoutDialogOpen(false);
     };
+
+    // filters the data for the current month
+    const filterDataForCurrentMonth = (userWeights: UserWeight[]): WeeklyDataPoint[] => {
+      // Get the start and end of the current month
+      const start = startOfMonth(new Date());
+      const end = endOfMonth(new Date());
+    
+      // Create an object to group weights by month
+      const groupedData: { [key: string]: number[] } = {};
+    
+      // Loop through the weights and filter by the current month
+      userWeights.forEach((weight) => {
+        // Parse the created_at date
+        const date = parseISO(weight.created_at);
+    
+        // Check if the weight's date is within the current month
+        if (isWithinInterval(date, { start, end })) {
+          // Get the month and year (e.g., "November 2024")
+          const monthYear = format(date, 'MMMM yyyy'); // e.g., "November 2024"
+    
+          // Group weights by month-year
+          if (groupedData[monthYear]) {
+            groupedData[monthYear].push(weight.weight);
+          } else {
+            groupedData[monthYear] = [weight.weight];
+          }
+        }
+      });
+    
+      // Calculate the average weight for each month
+      const monthlyData: WeeklyDataPoint[] = Object.keys(groupedData).map((month) => {
+        const weights = groupedData[month];
+        const avgWeight = weights.reduce((acc, weight) => acc + weight, 0) / weights.length;
+        return { dayOfWeek: month, avgWeight };  // "dayOfWeek" is misleading here, maybe rename it to "month"
+      });
+    
+      return monthlyData;
+    };
+
+    // this component creates the chart for the user's average weights througout the week
+    const WeeklyDataChart = ({ userWeights }: { userWeights: UserWeight[] | undefined }) => {
+      const [chartData, setChartData] = useState<any>(null);
+
+      useEffect(() => {
+        if(userWeights) {
+          // get the start and end of the current week
+          const start = startOfWeek(new Date());
+          const end = endOfWeek(new Date());
+
+          //group weights by day of the week
+          const groupedData: { [key: string]: number[] } = {};
+
+          userWeights.forEach((weight) => {
+            // parse the created_at date
+            const date = parseISO(weight.created_at);
+
+            // check if the weight's date is within the current week
+            if(isWithinInterval(date, { start, end })) {
+              // get the day of the week
+              const dayOfWeek = format(date, 'iiii'); // gets day of week (e.g. Monday)
+  
+              if(groupedData[dayOfWeek])
+                groupedData[dayOfWeek].push(weight.weight);
+              else
+                groupedData[dayOfWeek] = [weight.weight];
+            }
+          });
+
+          // Calculate the average weight for each day of the week
+          const weeklyData: WeeklyDataPoint[] = Object.keys(groupedData).map((day) => {
+            const weights = groupedData[day];
+            const avgWeight = weights.reduce((acc, weight) => acc + weight, 0) / weights.length;
+            return { dayOfWeek: day, avgWeight };
+          });
+
+          // sort by the days of the week in the correct order
+          const sortedData = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'].map((day) => {
+            const dataPoint = weeklyData.find((point) => point.dayOfWeek === day);
+            return dataPoint ? dataPoint.avgWeight : 0;
+          });
+
+          // now we set the chart data
+          setChartData({
+            labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+            datasets: [
+              {
+                label: 'Average Weight',
+                data: sortedData,
+                borderColor: 'rgba(75, 192, 192, 1)',
+                // backgroundColor: 'rgba(75, 192, 192, 0.2',
+                fill: false,
+              },
+            ],
+          });
+        }
+      }, [userWeights])
+
+      // options for our line chart
+      const options: ChartOptions<'line'> = {
+        responsive: true,
+        plugins: {
+          legend: {
+            display: true,
+            position: 'top',
+          },
+          title: {
+            display: true,
+            text: 'Weight Data for Current Week',
+          },
+        },
+        scales: {
+          x: {
+            title: {
+              display: true,
+              text: 'Day',
+            },
+          },
+          y: {
+            title: {
+              display: true,
+              text: 'Weight (lbs)',
+            },
+            beginAtZero: true,
+          },
+        },
+      };
+
+      // if we have no points, just return this
+      if(!chartData)
+        return <div>Loading...</div>
+
+      return <Line data={chartData} options={options} />;
+    }
+
+    // this component creates the chart for the user's average weights throughout the month
+    const MonthlyDataChart = () => {
+
+    }
     
     return (
         <div className="workout-journal" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
@@ -193,7 +335,7 @@ const WorkoutJournal = () => {
             <Card>
             <CardContent>
                 <Typography variant="h6">Weight Progress</Typography>
-                <Line data={data} options={options} />
+                <WeeklyDataChart userWeights={userWeights} />
             </CardContent>
             </Card>
 
@@ -233,15 +375,15 @@ const WorkoutJournal = () => {
 
             {/* Bottom-Right: Calories and Time */}
             <Card>
-                <CardContent style={{ textAlign: 'center' }}>
-                    <Typography variant="h6">Today's Workout</Typography>
-                    <div style={{ position: 'relative', display: 'inline-flex' }}>
-                        <CircularProgress
-                            variant="determinate"
-                            value={caloriePercentage}
-                            size={100}
-                            thickness={5}
-                            color={progressColor}
+              <CardContent style={{ textAlign: 'center' }}>
+                <Typography variant="h6">Today's Workout</Typography>
+                <div style={{ position: 'relative', display: 'inline-flex' }}>
+                  <CircularProgress
+                    variant="determinate"
+                    value={caloriePercentage}
+                    size={100}
+                    thickness={5}
+                    color={progressColor}
                         />
                         <div style={{
                             position: 'absolute',

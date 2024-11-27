@@ -38,8 +38,6 @@ export const GlobalProvider = ({children}:{children:JSX.Element}) => {
     setIsLoading(true);
     const { data: { session } } = await supabase.auth.getSession();
 
-    console.log('Session: ', session)
-
     if(session){
       // setSession(session);
       setIsLoggedIn(true);

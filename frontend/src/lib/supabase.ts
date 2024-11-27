@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { UpdateUserData } from './supabaseTypes';
+import { format } from 'date-fns';
 
 const supabaseUrl = 'https://tlssadzfzfxcufxvijlt.supabase.co'
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRsc3NhZHpmemZ4Y3VmeHZpamx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzEzNzEzODcsImV4cCI6MjA0Njk0NzM4N30.UNXzMbLvruACs5RdXp_Vy9N5ZPKkASbZlb41KnpcUu0';
@@ -98,10 +99,15 @@ export const useUpdateUser = () => {
         .select()
         .single();
       
+        
+      // need to get current day and add it to our new date
+      const created_at = format(new Date(), 'yyy-MM-dd');
+        
       // now we need to update the weight table for the user
       const { error: weightError, data: userWeights } = await supabase
         .from('weights')
         .insert({
+          created_at: created_at,
           weight: data.weight,
           user_id: data.id
         })
