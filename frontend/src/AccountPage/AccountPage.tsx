@@ -1,21 +1,36 @@
-import React from 'react'
-import SideNav from '../SideNav/SideNav'
-import { Avatar } from '@mui/material'
-import "./AccountPage.css"
+import React from "react";
+import SideNav from "../SideNav/SideNav";
+import { Avatar } from "@mui/material";
+import "./AccountPage.css";
 
 export default function AccountPage() {
   return (
     <div className="AccountPage">
-        <div className="Header flex-row" >
+      <div className="SideNavContainer">
+        <SideNav />
+      </div>
+      <div className="Account">
+        <div className="Header">
+          <div className="UserInfo">
             <div className="Avatar">
-                <Avatar className="Avatar"/>
+              <Avatar sx={{ width: "4rem", height: "4rem" }} />
             </div>
-            <div className="Username flex-col">
+            <div className="AboutMe">
+              <div className="AccountUsername">
                 <p>Name</p>
+              </div>
+              <div className="Bio">
+                <p>Going to gym soon</p>
+              </div>
             </div>
-
+          </div>
+          <div className="UserStats">
+            <p>Squats</p>
+            <p>Deadlift</p>
+            <p>Bench Press</p>
+          </div>
         </div>
-      
+      </div>
     </div>
-  )
+  );
 }
