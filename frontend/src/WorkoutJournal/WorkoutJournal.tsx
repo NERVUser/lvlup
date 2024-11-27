@@ -15,6 +15,7 @@ import {
     ListItemText,
     CircularProgress,
     IconButton,
+    Box,
 } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -24,7 +25,7 @@ import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import './WorkoutJournal.css';
-import { useGetUserWeights } from '../lib/supabase';
+import { useAddUserWeight, useGetUserWeights } from '../lib/supabase';
 import { useGlobalContext } from '../context/GlobalProvider';
 import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval, parseISO, format } from 'date-fns';
 
@@ -45,21 +46,24 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, T
 
 const WorkoutJournal = () => {
     const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
-    const [openDialog, setOpenDialog] = useState(false);
+    const [newWeight, setNewWeight] = useState(0);
     const [calories, setCalories] = useState<number | null>(null);
     const [time, setTime] = useState<number | null>(null);
     const [exercises, setExercises] = useState<{ name: string; sets: string }[]>([]);
     const [exerciseName, setExerciseName] = useState('');
     const [exerciseSets, setExerciseSets] = useState('');
-    const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [editIndex, setEditIndex] = useState<number | null>(null);
-    const [editWorkoutDialogOpen, setEditWorkoutDialogOpen] = useState(false);
-
+    
     // grab our user, and then using his id, get all weights on the backend associated with that user
     const { user } = useGlobalContext();
     const { data: userWeights } = useGetUserWeights(user?.id) as { data: UserWeight[] | undefined};
+    const { mutate: addWeight } = useAddUserWeight();
     // const [monthlyData, setMonthlyData] = useState<WeeklyDataPoint[]>(null);
-
+    
+    const [addWeightDialog, setAddWeightDialog] = useState(false);
+    const [openDialog, setOpenDialog] = useState(false);
+    const [editDialogOpen, setEditDialogOpen] = useState(false);
+    const [editWorkoutDialogOpen, setEditWorkoutDialogOpen] = useState(false);
 
     useEffect(() => {
       if(userWeights) {
@@ -95,11 +99,27 @@ const WorkoutJournal = () => {
     const caloriePercentage = calories ? (calories >= calorieGoal ? 100 : (calories / calorieGoal) * 100) : 0;
     const progressColor = calories && calories >= calorieGoal ? 'success' : 'primary';
     
+    const handleCancelWeightDialog = () => {
+      setNewWeight(0);
+      setAddWeightDialog(false);
+    }
+    const handleAddWeight = () => {
+      if(!newWeight || newWeight === 0)
+        return alert("Please enter your weight")
+
+      addWeight({
+        user_id: user?.id,
+        weight: newWeight
+      }, {
+        onSuccess: () => {
+          setNewWeight(0);
+          setAddWeightDialog(false);
+        }
+      })
+    }
 
     const handleAddWorkout = () => setOpenDialog(true);
-    const handleCloseDialog = () => {
-        setOpenDialog(false);
-    };
+    const handleCloseDialog = () => setOpenDialog(false);
 
     const handleAddExercise = () => {
         if (exerciseName.trim() !== '' && exerciseSets.trim() !== '') {
@@ -309,7 +329,7 @@ const WorkoutJournal = () => {
 
       // if we have no points, just return this
       if(!chartData)
-        return <div>Loading...</div>
+        return <div>Loading...</div>;
 
       return <Line data={chartData} options={options} />;
     }
@@ -320,204 +340,230 @@ const WorkoutJournal = () => {
     }
     
     return (
-        <div className="workout-journal" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-            {/* Top-Left: Date Calendar */}
-            <Card>
-            <CardContent>
-                <Typography variant="h6">Select Date</Typography>
-                <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <DateCalendar value={selectedDate} onChange={(newDate) => setSelectedDate(newDate)} />
-                </LocalizationProvider>
-            </CardContent>
-            </Card>
+      <div className="workout-journal" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+        {/* Top-Left: Date Calendar */}
+        <Card>
+          <CardContent>
+            <Typography variant="h6">Select Date</Typography>
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <DateCalendar value={selectedDate} onChange={(newDate) => setSelectedDate(newDate)} />
+            </LocalizationProvider>
+          </CardContent>
+        </Card>
 
-            {/* Top-Right: Weight Progress Graph */}
-            <Card>
-            <CardContent>
-                <Typography variant="h6">Weight Progress</Typography>
-                <WeeklyDataChart userWeights={userWeights} />
-            </CardContent>
-            </Card>
+        {/* Top-Right: Weight Progress Graph */}
+        <Card>
+          <CardContent>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Typography variant="h6">Weight Progress</Typography>
+              <Button variant='contained' onClick={() => setAddWeightDialog(true)}>Add Weight</Button>
+            </Box>
+            <WeeklyDataChart userWeights={userWeights} />
+          </CardContent>
+        </Card>
 
-            {/* Bottom-Left: Exercises List */}
-            <Card>
-            <CardContent>
-                <Typography variant="h6">Exercises</Typography>
-                <List className="exercise-list">
-                {exercises.map((exercise, index) => (
-                    <ListItem key={index}>
-                    <ListItemText 
-                        primary={exercise.name} 
-                        secondary={exercise.sets} 
-                        primaryTypographyProps={{ style: { color: '#000000' } }} 
-                        secondaryTypographyProps={{ style: { color: '#000000' } }} 
-                    />
-                    <IconButton aria-label="edit" onClick={() => handleEditExercise(index)}>
-                    <EditIcon />
-                    </IconButton>
-                    <IconButton aria-label="delete" onClick={() => handleDeleteExercise(index)}>
-                        <DeleteIcon />
-                    </IconButton>
-                    </ListItem>
-                ))}
-                </List>
-                    <Button
-                    variant="contained"
-                    color="primary"
+        {/* Bottom-Left: Exercises List */}
+        <Card>
+          <CardContent>
+            <Typography variant="h6">Exercises</Typography>
+            <List className="exercise-list">
+            {exercises.map((exercise, index) => (
+              <ListItem key={index}>
+                <ListItemText 
+                    primary={exercise.name} 
+                    secondary={exercise.sets} 
+                    primaryTypographyProps={{ style: { color: '#000000' } }} 
+                    secondaryTypographyProps={{ style: { color: '#000000' } }} 
+                />
+                <IconButton aria-label="edit" onClick={() => handleEditExercise(index)}>
+                <EditIcon />
+                </IconButton>
+                <IconButton aria-label="delete" onClick={() => handleDeleteExercise(index)}>
+                  <DeleteIcon />
+                </IconButton>
+              </ListItem>
+            ))}
+            </List>
+              <Button
+                variant="contained"
+                color="primary"
+                fullWidth
+                style={{ marginTop: '20px' }}
+                onClick={handleAddWorkout}
+                >
+                  Add Workout
+              </Button>
+          </CardContent>
+        </Card>
+
+          {/* Bottom-Right: Calories and Time */}
+          <Card>
+            <CardContent style={{ textAlign: 'center' }}>
+              <Typography variant="h6">Today's Workout</Typography>
+              <div style={{ position: 'relative', display: 'inline-flex' }}>
+                <CircularProgress
+                  variant="determinate"
+                  value={caloriePercentage}
+                  size={100}
+                  thickness={5}
+                  color={progressColor}
+                />
+                <div style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  bottom: 0,
+                  right: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexDirection: 'column'
+                }}>
+                <Typography variant="h5">{calories !== null ? calories : 0}</Typography>
+                <Typography variant="caption">Calories</Typography>
+                </div>
+              </div>
+              <div style={{ marginTop: '20px' }}>
+                <Typography variant="h5">{time !== null ? time : 0} Minutes</Typography>
+              </div>
+              {calories !== null && time !== null && (
+                <IconButton aria-label="edit" onClick={handleEditWorkout} style={{ marginTop: '10px' }}>
+                  <EditIcon />
+                </IconButton>
+              )}
+            </CardContent>
+          </Card>
+
+        {/* Add Weight Dialog */}
+        <Dialog open={addWeightDialog} onClose={() => setAddWeightDialog(false)}>
+          <DialogTitle>Add New Weight</DialogTitle>
+          <DialogContent sx={{ marginInline: '12px'}}>
+            <TextField
+              label='New Weight'
+              type='number'
+              fullWidth
+              margin='dense'
+              value={newWeight}
+              onChange={(e) => setNewWeight(parseFloat(e.target.value))}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCancelWeightDialog} color="secondary">
+              Cancel
+            </Button>
+            <Button onClick={handleAddWeight} color="primary" variant="contained">
+              Save Workout
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Workout Dialog */}
+        <Dialog open={openDialog} onClose={handleCloseDialog}>
+          <DialogTitle>Add Workout Details</DialogTitle>
+          <DialogContent>
+            <TextField
+                label="Calories Burned"
+                type="number"
+                fullWidth
+                margin="dense"
+                value={calories !== null ? calories : ''}
+                onChange={(e) => setCalories(Number(e.target.value))}
+            />
+            <TextField
+                label="Time Spent (minutes)"
+                type="number"
+                fullWidth
+                margin="dense"
+                value={time !== null ? time : ''}
+                onChange={(e) => setTime(Number(e.target.value))}
+            />
+            <TextField
+                label="Exercise Name"
+                fullWidth
+                margin="dense"
+                value={exerciseName}
+                onChange={(e) => setExerciseName(e.target.value)}
+            />
+            <TextField
+                label="Sets (e.g., 3x10)"
+                fullWidth
+                margin="dense"
+                value={exerciseSets}
+                onChange={(e) => setExerciseSets(e.target.value)}
+            />
+            <Button onClick={handleAddExercise} variant="outlined" color="primary" style={{ marginTop: '10px' }}>
+                Add Exercise
+            </Button>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseDialog} color="secondary">
+              Cancel
+            </Button>
+            <Button onClick={handleSaveWorkout} color="primary" variant="contained">
+              Save Workout
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Edit Exercise Dialog */}
+        <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)}>
+            <DialogTitle>Edit Exercise</DialogTitle>
+            <DialogContent>
+                <TextField
+                    label="Exercise Name"
                     fullWidth
-                    style={{ marginTop: '20px' }}
-                    onClick={handleAddWorkout}
-                    >
-                    Add Workout
-                    </Button>
-                </CardContent>
-            </Card>
+                    margin="dense"
+                    value={exerciseName}
+                    onChange={(e) => setExerciseName(e.target.value)}
+                />
+                <TextField
+                    label="Sets (e.g., 3x10)"
+                    fullWidth
+                    margin="dense"
+                    value={exerciseSets}
+                    onChange={(e) => setExerciseSets(e.target.value)}
+                />
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={() => setEditDialogOpen(false)} color="secondary">
+                    Cancel
+                </Button>
+                <Button onClick={handleSaveEditExercise} color="primary" variant="contained">
+                    Save Changes
+                </Button>
+            </DialogActions>
+        </Dialog>
 
-            {/* Bottom-Right: Calories and Time */}
-            <Card>
-              <CardContent style={{ textAlign: 'center' }}>
-                <Typography variant="h6">Today's Workout</Typography>
-                <div style={{ position: 'relative', display: 'inline-flex' }}>
-                  <CircularProgress
-                    variant="determinate"
-                    value={caloriePercentage}
-                    size={100}
-                    thickness={5}
-                    color={progressColor}
-                        />
-                        <div style={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            bottom: 0,
-                            right: 0,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            flexDirection: 'column'
-                        }}>
-                            <Typography variant="h5">{calories !== null ? calories : 0}</Typography>
-                            <Typography variant="caption">Calories</Typography>
-                        </div>
-                    </div>
-                    <div style={{ marginTop: '20px' }}>
-                        <Typography variant="h5">{time !== null ? time : 0} Minutes</Typography>
-                    </div>
-                    {calories !== null && time !== null && (
-                        <IconButton aria-label="edit" onClick={handleEditWorkout} style={{ marginTop: '10px' }}>
-                            <EditIcon />
-                        </IconButton>
-                    )}
-                </CardContent>
-            </Card>
-
-            {/* Workout Dialog */}
-            <Dialog open={openDialog} onClose={handleCloseDialog}>
-                <DialogTitle>Add Workout Details</DialogTitle>
-                <DialogContent>
-                    <TextField
-                        label="Calories Burned"
-                        type="number"
-                        fullWidth
-                        margin="dense"
-                        value={calories !== null ? calories : ''}
-                        onChange={(e) => setCalories(Number(e.target.value))}
-                    />
-                    <TextField
-                        label="Time Spent (minutes)"
-                        type="number"
-                        fullWidth
-                        margin="dense"
-                        value={time !== null ? time : ''}
-                        onChange={(e) => setTime(Number(e.target.value))}
-                    />
-                    <TextField
-                        label="Exercise Name"
-                        fullWidth
-                        margin="dense"
-                        value={exerciseName}
-                        onChange={(e) => setExerciseName(e.target.value)}
-                    />
-                    <TextField
-                        label="Sets (e.g., 3x10)"
-                        fullWidth
-                        margin="dense"
-                        value={exerciseSets}
-                        onChange={(e) => setExerciseSets(e.target.value)}
-                    />
-                    <Button onClick={handleAddExercise} variant="outlined" color="primary" style={{ marginTop: '10px' }}>
-                        Add Exercise
-                    </Button>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleCloseDialog} color="secondary">
-                        Cancel
-                    </Button>
-                    <Button onClick={handleSaveWorkout} color="primary" variant="contained">
-                        Save Workout
-                    </Button>
-                </DialogActions>
-            </Dialog>
-
-            {/* Edit Exercise Dialog */}
-            <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)}>
-                <DialogTitle>Edit Exercise</DialogTitle>
-                <DialogContent>
-                    <TextField
-                        label="Exercise Name"
-                        fullWidth
-                        margin="dense"
-                        value={exerciseName}
-                        onChange={(e) => setExerciseName(e.target.value)}
-                    />
-                    <TextField
-                        label="Sets (e.g., 3x10)"
-                        fullWidth
-                        margin="dense"
-                        value={exerciseSets}
-                        onChange={(e) => setExerciseSets(e.target.value)}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setEditDialogOpen(false)} color="secondary">
-                        Cancel
-                    </Button>
-                    <Button onClick={handleSaveEditExercise} color="primary" variant="contained">
-                        Save Changes
-                    </Button>
-                </DialogActions>
-            </Dialog>
-
-            {/* Edit Workout Dialog */}
-            <Dialog open={editWorkoutDialogOpen} onClose={() => setEditWorkoutDialogOpen(false)}>
-                <DialogTitle>Edit Today's Workout</DialogTitle>
-                <DialogContent>
-                    <TextField
-                        label="Calories Burned"
-                        type="number"
-                        fullWidth
-                        margin="dense"
-                        value={calories !== null ? calories : ''}
-                        onChange={(e) => setCalories(Number(e.target.value))}
-                    />
-                    <TextField
-                        label="Time Spent (minutes)"
-                        type="number"
-                        fullWidth
-                        margin="dense"
-                        value={time !== null ? time : ''}
-                        onChange={(e) => setTime(Number(e.target.value))}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setEditWorkoutDialogOpen(false)} color="secondary">
-                        Cancel
-                    </Button>
-                    <Button onClick={handleSaveEditWorkout} color="primary" variant="contained">
-                        Save Changes
-                    </Button>
-                </DialogActions>
-            </Dialog>
+        {/* Edit Workout Dialog */}
+        <Dialog open={editWorkoutDialogOpen} onClose={() => setEditWorkoutDialogOpen(false)}>
+            <DialogTitle>Edit Today's Workout</DialogTitle>
+            <DialogContent>
+                <TextField
+                    label="Calories Burned"
+                    type="number"
+                    fullWidth
+                    margin="dense"
+                    value={calories !== null ? calories : ''}
+                    onChange={(e) => setCalories(Number(e.target.value))}
+                />
+                <TextField
+                    label="Time Spent (minutes)"
+                    type="number"
+                    fullWidth
+                    margin="dense"
+                    value={time !== null ? time : ''}
+                    onChange={(e) => setTime(Number(e.target.value))}
+                />
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={() => setEditWorkoutDialogOpen(false)} color="secondary">
+                    Cancel
+                </Button>
+                <Button onClick={handleSaveEditWorkout} color="primary" variant="contained">
+                    Save Changes
+                </Button>
+            </DialogActions>
+        </Dialog>
         </div>
     );
 };

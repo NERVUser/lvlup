@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { UpdateUserData } from './supabaseTypes';
+import { AddWeightData, UpdateUserData } from './supabaseTypes';
 import { format } from 'date-fns';
 
 const supabaseUrl = 'https://tlssadzfzfxcufxvijlt.supabase.co'
@@ -101,7 +101,7 @@ export const useUpdateUser = () => {
       
         
       // need to get current day and add it to our new date
-      const created_at = format(new Date(), 'yyy-MM-dd');
+      const created_at = format(new Date(), 'yyyy-MM-dd');
         
       // now we need to update the weight table for the user
       const { error: weightError, data: userWeights } = await supabase
@@ -142,6 +142,35 @@ export const useGetUserWeights = (id: string | undefined) => {
       if(error)
         throw new Error(error.message);
       return data;
+    }
+  })
+}
+
+// allows us to add a new weight for the user
+export const useAddUserWeight = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, AddWeightData>({
+    mutationFn: async (data: AddWeightData) => {
+      // need to get current day and add it to our new date
+      const created_at = format(new Date(), 'yyyy-MM-dd');
+
+      const { error } = await supabase
+        .from('weights')
+        .insert({
+          created_at: created_at,
+          weight: data.weight,
+          user_id: data.user_id
+        })
+        .select();
+
+        if(error)
+          throw new Error(error.message);
+    }, 
+    async onSuccess(newWeightData, { user_id }) {
+      // do this for user data and their weight data
+      queryClient.invalidateQueries({ queryKey: ['profileWeights', user_id] });
+
     }
   })
 }

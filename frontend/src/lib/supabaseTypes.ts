@@ -8,4 +8,9 @@ export interface UpdateUserData {
     bio?: string;
     fitness_level?: Number;
     weight: Number;
-  }
+}
+
+export interface AddWeightData {
+  user_id: string | undefined;
+  weight: number;
+}
