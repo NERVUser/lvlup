@@ -16,6 +16,7 @@ import {
     CircularProgress,
     IconButton,
     Box,
+    DialogContentText,
 } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -27,7 +28,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import './WorkoutJournal.css';
 import { useAddUserWeight, useGetUserWeights } from '../lib/supabase';
 import { useGlobalContext } from '../context/GlobalProvider';
-import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval, parseISO, format } from 'date-fns';
+import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval, parseISO, format, add } from 'date-fns';
+import FetchedWorkoutComponent from '../components/FetchedWorkoutComponent';
 
 interface UserWeight {
     id: number;
@@ -41,6 +43,15 @@ type WeeklyDataPoint = {
   avgWeight: number;
 };
 
+interface FetchedWorkout {
+  name: string;
+  calories_per_hour: number;
+  duration_minutes: number;
+  total_calories: number;
+}
+
+const fetchedWorkouts: FetchedWorkout[] | null = [];
+
 // Register chart components
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
@@ -49,6 +60,16 @@ const WorkoutJournal = () => {
     const [newWeight, setNewWeight] = useState(0);
     const [calories, setCalories] = useState<number | null>(null);
     const [time, setTime] = useState<number | null>(null);
+    const [addExerciseForm, setAddExerciseForm] = useState({
+      exerciseName: '',
+      duration: 60,
+      caloriesBurned: 0,
+      exerciseSets: 0,
+      exerciseReps: 0,
+      exerciseWeight: 0
+    })
+    const [fetchedWorkouts, setFetchedWorkouts] = useState<FetchedWorkout[] | null>(null);
+    const [toggledWorkoutType, setToggledWorkoutType] = useState('search')
     const [exercises, setExercises] = useState<{ name: string; sets: string }[]>([]);
     const [exerciseName, setExerciseName] = useState('');
     const [exerciseSets, setExerciseSets] = useState('');
@@ -120,6 +141,42 @@ const WorkoutJournal = () => {
 
     const handleAddWorkout = () => setOpenDialog(true);
     const handleCloseDialog = () => setOpenDialog(false);
+
+    const fetchWorkout = async (activity: string, duration: number) => {
+      let fixedDuration = duration;
+      let newWeight = 160;
+      // set our duration to 60 if not > 1
+      if(fixedDuration <= 1)
+        fixedDuration = 60;
+
+      //fetch the current weight of the user if available
+      if(userWeights && userWeights.length > 0)
+        newWeight = userWeights[userWeights.length - 1].weight;
+
+      const apiKey = 'NxUluHVadxEpPioUZ9fAOA==tUBsDWBDZoHNLsbh';
+                     
+      try {
+        const response = await fetch(
+          `https://api.api-ninjas.com/v1/caloriesburned?activity=${activity}&duration=${fixedDuration}&weight=${newWeight}`,
+          {
+            method: 'GET',
+            headers: {
+              'X-Api-Key': apiKey,
+            },
+          }
+        );
+
+        if(!response.ok)
+          return console.log('Error:', response.status, await response.text());
+        
+        const data = await response.json();
+        console.log(data);
+        setFetchedWorkouts(data);
+        
+      } catch (error) {
+        console.log("Error", error)
+      }
+    }
 
     const handleAddExercise = () => {
         if (exerciseName.trim() !== '' && exerciseSets.trim() !== '') {
@@ -370,10 +427,10 @@ const WorkoutJournal = () => {
             {exercises.map((exercise, index) => (
               <ListItem key={index}>
                 <ListItemText 
-                    primary={exercise.name} 
-                    secondary={exercise.sets} 
-                    primaryTypographyProps={{ style: { color: '#000000' } }} 
-                    secondaryTypographyProps={{ style: { color: '#000000' } }} 
+                  primary={exercise.name} 
+                  secondary={exercise.sets} 
+                  primaryTypographyProps={{ style: { color: '#000000' } }} 
+                  secondaryTypographyProps={{ style: { color: '#000000' } }} 
                 />
                 <IconButton aria-label="edit" onClick={() => handleEditExercise(index)}>
                 <EditIcon />
@@ -459,42 +516,85 @@ const WorkoutJournal = () => {
 
         {/* Workout Dialog */}
         <Dialog open={openDialog} onClose={handleCloseDialog}>
+          <DialogTitle>Search For a Workout</DialogTitle>
           <DialogTitle>Add Workout Details</DialogTitle>
-          <DialogContent>
-            <TextField
-                label="Calories Burned"
-                type="number"
+          {toggledWorkoutType === 'search' ? (
+            <DialogContent>
+              <TextField
+                label='Search for an exercise'
+                type='text'
                 fullWidth
-                margin="dense"
-                value={calories !== null ? calories : ''}
-                onChange={(e) => setCalories(Number(e.target.value))}
-            />
-            <TextField
+                margin='dense'
+                value={addExerciseForm.exerciseName}
+                onChange={(e) => setAddExerciseForm({... addExerciseForm, exerciseName: e.target.value})}
+              />
+              <TextField
                 label="Time Spent (minutes)"
                 type="number"
                 fullWidth
                 margin="dense"
-                value={time !== null ? time : ''}
-                onChange={(e) => setTime(Number(e.target.value))}
-            />
-            <TextField
+                value={addExerciseForm.duration}
+                onChange={(e) => setAddExerciseForm({... addExerciseForm, duration: Number(e.target.value)})}
+              />
+              <Button variant='contained' onClick={() => fetchWorkout(addExerciseForm.exerciseName, addExerciseForm.duration)}>Search</Button>
+            
+              <List className="exercise-list">
+                <Typography>Exercises</Typography>
+                {fetchedWorkouts?.map((exercise: FetchedWorkout, index: number) => (
+                  <FetchedWorkoutComponent key={index} exerciseName={exercise.name} caloriesBurned={exercise.total_calories} isSelected={false}/>
+                ))}
+              </List>
+            </DialogContent>
+          ) : (
+            <DialogContent>
+              <TextField
                 label="Exercise Name"
                 fullWidth
                 margin="dense"
-                value={exerciseName}
-                onChange={(e) => setExerciseName(e.target.value)}
-            />
-            <TextField
-                label="Sets (e.g., 3x10)"
+                value={addExerciseForm.exerciseName}
+                onChange={(e) => setAddExerciseForm({... addExerciseForm, exerciseName: e.target.value})}
+              />
+              <TextField
+                label="Time Spent (minutes)"
+                type="number"
                 fullWidth
                 margin="dense"
-                value={exerciseSets}
-                onChange={(e) => setExerciseSets(e.target.value)}
-            />
-            <Button onClick={handleAddExercise} variant="outlined" color="primary" style={{ marginTop: '10px' }}>
+                value={addExerciseForm.duration}
+                onChange={(e) => setAddExerciseForm({... addExerciseForm, duration: Number(e.target.value)})}
+              />
+              <TextField
+                label="Calories Burned"
+                type="number"
+                fullWidth
+                margin="dense"
+                value={addExerciseForm.caloriesBurned}
+                onChange={(e) => setAddExerciseForm({... addExerciseForm, caloriesBurned: Number(e.target.value)})}
+              />
+              <Box sx={{ display: 'flex', gap: '12px' }}>
+                <TextField
+                  label="Sets"
+                  fullWidth
+                  margin="dense"
+                  type='number'
+                  value={addExerciseForm.exerciseSets}
+                  onChange={(e) => setAddExerciseForm({... addExerciseForm, exerciseSets: Number(e.target.value)})}
+                />
+                <TextField
+                  label="Reps"
+                  fullWidth
+                  margin="dense"
+                  type='number'
+                  value={addExerciseForm.exerciseSets}
+                  onChange={(e) => setAddExerciseForm({... addExerciseForm, exerciseReps: Number(e.target.value)})}
+                />
+              </Box>
+              <Button onClick={handleAddExercise} variant="outlined" color="primary" style={{ marginTop: '10px' }}>
                 Add Exercise
-            </Button>
-          </DialogContent>
+              </Button>
+            </DialogContent>
+          )}
+          
+
           <DialogActions>
             <Button onClick={handleCloseDialog} color="secondary">
               Cancel
