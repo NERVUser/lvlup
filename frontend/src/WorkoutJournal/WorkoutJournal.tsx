@@ -26,7 +26,7 @@ import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import './WorkoutJournal.css';
-import { useAddUserWeight, useGetUserWeights } from '../lib/supabase';
+import { useAddUserWeight, useGetUserWeights, useGetUserWorkouts } from '../lib/supabase';
 import { useGlobalContext } from '../context/GlobalProvider';
 import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval, parseISO, format, add } from 'date-fns';
 import FetchedWorkoutComponent from '../components/FetchedWorkoutComponent';
@@ -78,6 +78,7 @@ const WorkoutJournal = () => {
     // grab our user, and then using his id, get all weights on the backend associated with that user
     const { user } = useGlobalContext();
     const { data: userWeights } = useGetUserWeights(user?.id) as { data: UserWeight[] | undefined};
+    const { data: userWorkouts } = useGetUserWorkouts(user?.id);
     const { mutate: addWeight } = useAddUserWeight();
     // const [monthlyData, setMonthlyData] = useState<WeeklyDataPoint[]>(null);
     
@@ -144,6 +145,7 @@ const WorkoutJournal = () => {
 
     const fetchWorkout = async (activity: string, duration: number) => {
       let fixedDuration = duration;
+      // set default weight to 160, and then change it if user has a weight
       let newWeight = 160;
       // set our duration to 60 if not > 1
       if(fixedDuration <= 1)

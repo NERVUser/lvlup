@@ -175,3 +175,39 @@ export const useAddUserWeight = () => {
   })
 }
 
+// get all workouts for the user
+export const useGetUserWorkouts = (id: string | undefined) => {
+  return useQuery({
+    queryKey: ['workouts', id],
+    queryFn: async () => {
+      const { error, data } = await supabase
+        .from('workouts')
+        .select('*')
+        .eq('user_id', id);
+        
+      if(error)
+        throw new Error(error.message)
+      return data;
+    }
+  })
+}
+
+// get all exercises associated with a particular workout
+export const useGetWorkoutExercises = (id: string | undefined) => {
+  return useQuery({
+    queryKey: ['exercises', id],
+    queryFn: async () => {
+      const { error, data } = await supabase
+        .from('exercises')
+        .select('*')
+        .eq('workout_id', id);
+
+      if(error)
+        throw new Error(error.message);
+      return data;
+    }
+  })
+}
+
+
+
