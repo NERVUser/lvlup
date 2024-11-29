@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './FoodJournal.css';
 import { Button, IconButton, CircularProgress, LinearProgress, Dialog, DialogTitle, DialogContent, DialogActions, TextField, List, ListItem, ListItemText } from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { Navigate } from 'react-router-dom';
+import axios from 'axios';
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { DateCalendar } from '@mui/x-date-pickers';
 
 function FoodJournal() {
     const calorieGoal = 2000;
@@ -30,11 +34,54 @@ function FoodJournal() {
     const [foodFat, setFoodFat] = useState<number | null>(null);
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [editIndex, setEditIndex] = useState<number | null>(null);
+    const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+    const [loading, setLoading] = useState(false);
+    const [calendarDialogOpen, setCalendarDialogOpen] = useState(false);
 
     const caloriePercentage = (calorieIntake / calorieGoal) * 100;
     const carbsPercentage = (carbs / carbsGoal) * 100;
     const proteinPercentage = (protein / proteinGoal) * 100;
     const fatPercentage = (fat / fatGoal) * 100;
+
+    useEffect(() => {
+        if (selectedDate) {
+            fetchFoodData(selectedDate);
+        }
+    }, [selectedDate]);
+
+    const fetchFoodData = async (date: Date) => {
+        setLoading(true);
+        const dateKey = date.toISOString().split('T')[0];
+        try {
+            const response = await axios.get(`/api/foodJournal/${dateKey}`);
+            if (response.data) {
+                setBreakfastItems(response.data.breakfastItems);
+                setLunchItems(response.data.lunchItems);
+                setDinnerItems(response.data.dinnerItems);
+                setCalorieIntake(response.data.calorieIntake);
+                setCarbs(response.data.carbs);
+                setProtein(response.data.protein);
+                setFat(response.data.fat);
+            } else {
+                resetFoodData();
+            }
+        } catch (error) {
+            console.error("Error fetching food data:", error);
+            resetFoodData();
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const resetFoodData = () => {
+        setBreakfastItems([]);
+        setLunchItems([]);
+        setDinnerItems([]);
+        setCalorieIntake(0);
+        setCarbs(0);
+        setProtein(0);
+        setFat(0);
+    };
 
     const handleAddFood = (meal: 'breakfast' | 'lunch' | 'dinner') => {
         setCurrentMeal(meal);
@@ -51,7 +98,7 @@ function FoodJournal() {
         setFoodFat(null);
     };
 
-    const handleSaveFood = () => {
+    const handleSaveFood = async () => {
         if (foodName.trim() !== '' && foodQuantity.trim() !== '') {
             const newFoodItem = {
                 name: foodName,
@@ -61,17 +108,39 @@ function FoodJournal() {
                 protein: foodProtein || 0,
                 fat: foodFat || 0,
             };
+            let updatedItems;
             if (currentMeal === 'breakfast') {
-                setBreakfastItems([...breakfastItems, newFoodItem]);
+                updatedItems = [...breakfastItems, newFoodItem];
+                setBreakfastItems(updatedItems);
             } else if (currentMeal === 'lunch') {
-                setLunchItems([...lunchItems, newFoodItem]);
+                updatedItems = [...lunchItems, newFoodItem];
+                setLunchItems(updatedItems);
             } else if (currentMeal === 'dinner') {
-                setDinnerItems([...dinnerItems, newFoodItem]);
+                updatedItems = [...dinnerItems, newFoodItem];
+                setDinnerItems(updatedItems);
             }
             setCalorieIntake(calorieIntake + (foodCalories || 0));
             setCarbs(carbs + (foodCarbs || 0));
             setProtein(protein + (foodProtein || 0));
             setFat(fat + (foodFat || 0));
+
+            const dateKey = selectedDate?.toISOString().split('T')[0];
+            if (dateKey) {
+                try {
+                    await axios.post(`/api/foodJournal/${dateKey}`, {
+                        date: dateKey,
+                        breakfastItems,
+                        lunchItems,
+                        dinnerItems,
+                        calorieIntake: calorieIntake + (foodCalories || 0),
+                        carbs: carbs + (foodCarbs || 0),
+                        protein: protein + (foodProtein || 0),
+                        fat: fat + (foodFat || 0),
+                    });
+                } catch (error) {
+                    console.error("Error saving food data:", error);
+                }
+            }
         }
         handleCloseDialog();
     };
@@ -90,7 +159,7 @@ function FoodJournal() {
         setEditDialogOpen(true);
     };
 
-    const handleSaveEditFood = () => {
+    const handleSaveEditFood = async () => {
         if (editIndex !== null) {
             const updatedItems = currentMeal === 'breakfast' ? [...breakfastItems] : currentMeal === 'lunch' ? [...lunchItems] : [...dinnerItems];
             const oldItem = updatedItems[editIndex];
@@ -114,6 +183,25 @@ function FoodJournal() {
             setCarbs(carbs - oldItem.carbs + (foodCarbs || 0));
             setProtein(protein - oldItem.protein + (foodProtein || 0));
             setFat(fat - oldItem.fat + (foodFat || 0));
+
+            const dateKey = selectedDate?.toISOString().split('T')[0];
+            if (dateKey) {
+                try {
+                    await axios.post(`/api/foodJournal/${dateKey}`, {
+                        date: dateKey,
+                        breakfastItems,
+                        lunchItems,
+                        dinnerItems,
+                        calorieIntake: calorieIntake - oldItem.calories + (foodCalories || 0),
+                        carbs: carbs - oldItem.carbs + (foodCarbs || 0),
+                        protein: protein - oldItem.protein + (foodProtein || 0),
+                        fat: fat - oldItem.fat + (foodFat || 0),
+                    });
+                } catch (error) {
+                    console.error("Error saving edited food data:", error);
+                }
+            }
+
             setEditIndex(null);
             setFoodName('');
             setFoodQuantity('');
@@ -125,7 +213,7 @@ function FoodJournal() {
         }
     };
 
-    const handleDeleteFood = (meal: 'breakfast' | 'lunch' | 'dinner', index: number) => {
+    const handleDeleteFood = async (meal: 'breakfast' | 'lunch' | 'dinner', index: number) => {
         const updatedItems = meal === 'breakfast' ? breakfastItems.filter((_, i) => i !== index)
             : meal === 'lunch' ? lunchItems.filter((_, i) => i !== index)
             : dinnerItems.filter((_, i) => i !== index);
@@ -146,11 +234,59 @@ function FoodJournal() {
         setCarbs(carbs - deletedItem.carbs);
         setProtein(protein - deletedItem.protein);
         setFat(fat - deletedItem.fat);
+
+        const dateKey = selectedDate?.toISOString().split('T')[0];
+        if (dateKey) {
+            try {
+                await axios.post(`/api/foodJournal/${dateKey}`, {
+                    date: dateKey,
+                    breakfastItems,
+                    lunchItems,
+                    dinnerItems,
+                    calorieIntake: calorieIntake - deletedItem.calories,
+                    carbs: carbs - deletedItem.carbs,
+                    protein: protein - deletedItem.protein,
+                    fat: fat - deletedItem.fat,
+                });
+            } catch (error) {
+                console.error("Error saving food data after deletion:", error);
+            }
+        }
+    };
+
+    const handleOpenCalendarDialog = () => {
+        setCalendarDialogOpen(true);
+    };
+
+    const handleCloseCalendarDialog = () => {
+        setCalendarDialogOpen(false);
     };
 
     return (
         <div className="food-journal-container">
-            <h1 className="header">Food Journal</h1>
+            <h1 className="header" style={{ textAlign: 'center' }}>
+                <Button variant="text" onClick={handleOpenCalendarDialog} style={{ fontSize: '2rem', color: '#1976d2' }}>
+                    Today
+                </Button>
+            </h1>
+
+            {/* Calendar Dialog */}
+            <Dialog open={calendarDialogOpen} onClose={handleCloseCalendarDialog}>
+                <DialogTitle>Select Date</DialogTitle>
+                <DialogContent>
+                    <LocalizationProvider dateAdapter={AdapterDateFns}>
+                        <DateCalendar value={selectedDate} onChange={(newDate) => {
+                            setSelectedDate(newDate);
+                            handleCloseCalendarDialog();
+                        }} />
+                    </LocalizationProvider>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleCloseCalendarDialog} color="secondary">
+                        Cancel
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
             {/* Calorie Summary Section */}
             <div className="calories-summary">
@@ -200,8 +336,8 @@ function FoodJournal() {
                     <h2>{meal.charAt(0).toUpperCase() + meal.slice(1)}</h2>
                     <List>
                         {(meal === 'breakfast' ? breakfastItems : meal === 'lunch' ? lunchItems : dinnerItems).map((item, index) => (
-                            <ListItem key={index} style={{ color: '#ffffff' }}>
-                                <ListItemText primary={item.name} secondary={`${item.quantity}, Calories: ${item.calories}, Carbs: ${item.carbs}g, Protein: ${item.protein}g, Fat: ${item.fat}g`} />
+                            <ListItem key={index} style={{ color: '#ffffff', backgroundColor: '#424242', borderRadius: '8px', marginBottom: '10px', padding: '10px' }}>
+                                <ListItemText primary={<strong>{item.name}</strong>} secondary={<span style={{ fontSize: '0.9rem' }}>{`${item.quantity}, Calories: ${item.calories}, Carbs: ${item.carbs}g, Protein: ${item.protein}g, Fat: ${item.fat}g`}</span>} />
                                 <IconButton aria-label="edit" onClick={() => handleEditFood(meal as 'breakfast' | 'lunch' | 'dinner', index)} style={{ color: '#ffffff' }}>
                                     <EditIcon />
                                 </IconButton>
