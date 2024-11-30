@@ -1,19 +1,11 @@
 /* FoodJournal.css */
 
-/* Global Styles */
-body {
-    background-color: black;
-    color: white;
-    font-family: Arial, sans-serif;
-}
-
 .food-journal-container {
     max-width: 500px;
     margin: 20px auto;
     padding: 20px;
     background-color: #333; /* Darker background to contrast with progress bars */
     border-radius: 10px;
-    color: #fff; /* Text color for better contrast on dark background */
 }
 
 .calories-summary {

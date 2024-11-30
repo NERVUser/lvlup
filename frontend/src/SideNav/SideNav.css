@@ -1,20 +1,28 @@
-.SideNav{
-    min-height: 100%;
-    min-width: 200px;
-    background-color: black;
-    position: relative;
-    margin-left: 5px;
+#sidenav {
+  background-color: grey;
+  height: 100vh;
+  width: 250px;
+  display: flex;
+  position: sticky;
+  top: 0;
+  border-top-right-radius: 35px;
+  border-bottom-right-radius: 35px;
 }
-.MenuOptions{
-    color: white;
-    margin-top: 2rem;
+
+#sidenavList {
+  padding: 0px;
+  margin: 0px;
+  list-style: none;
+  margin: 9%;
 }
-.MenuBar{
-    color: white;
+
+.sidenavListItem {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  background-color: grey;
 }
-.MenuOptionsItem{
-    display: flex;
-    align-items: center;
-    font-family: 'Acari Sans', sans-serif;
-    border: 2px solid red;
+
+.sidenavIcon {
+  margin-right: 15px;
 }

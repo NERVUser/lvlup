@@ -7,22 +7,19 @@ import Home from './Home/Home';
 import Feedpage from './Feedpage/Feedpage'
 import WorkoutJournal from './WorkoutJournal/WorkoutJournal'
 import FoodJournal from './FoodJournal/FoodJournal'
-import { createTheme } from '@mui/material/styles';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import AccountSetup from './AccountSetup/AccountSetup';
 import SideNav from './SideNav/SideNav';
 import PrivateRoutes from './utils/PrivateRoutes';
 import GlobalProvider from './context/GlobalProvider';
 import RecommendationsPage from './Recommendations/Recommendations';
-
-// Create a default MUI theme (you can customize this later if needed)
-const theme = createTheme();
+import './index.css'
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div style={{ display: 'flex' }}>
+    <div style={{display: 'flex'}}>
       <SideNav />
-      <div style={{ flex: 1 }}>
+      <div style={{flex: 1}}>
         {children}
       </div>
     </div>
