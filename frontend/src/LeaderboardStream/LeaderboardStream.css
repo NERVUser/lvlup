@@ -1,0 +1,129 @@
+/* Leaderboard Styles */
+
+@keyframes ScoreLoad {
+    from {
+        background-color: #81c784; /* Soft green color for loading animation */
+    }
+    to {
+        background-color: white;
+    }
+}
+
+.LeaderboardContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 90%;
+    max-width: 500px; /* Further reduced max-width for better fit */
+    margin: auto;
+    padding: 1.5rem;
+    background-color: #2d2d2d; /* Darker background for a more leaderboard-like appearance */
+    border-radius: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    color: #f0f0f0; /* Light text color for contrast */
+}
+
+.Title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 1rem;
+    font-family: 'Acari Sans', sans-serif;
+    color: #f0f0f0; /* Light text color for better contrast */
+}
+
+.Title h1 {
+    padding: 0;
+    margin: 0;
+    font-size: 1.6rem; /* Reduced font size for better fit */
+}
+
+.Buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.ButtonObject button {
+    height: 2.5rem;
+    width: 6rem;
+    border-radius: 20px;
+    cursor: pointer;
+    border: none;
+    background-color: #424242; /* Darker button background */
+    color: #ffeb3b; /* Yellow text color for better contrast */
+    font-weight: bold;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.ButtonObject button:hover {
+    background-color: #616161;
+    color: #ffffff;
+}
+
+.Scores {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.LeaderboardTable {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    margin-top: 1rem;
+    background-color: #3e3e3e; /* Darker background for the table */
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.LeaderboardTable th, .LeaderboardTable td {
+    padding: 0.6rem; /* Reduced padding for better fit */
+    text-align: left;
+    border-bottom: 1px solid #555; /* Darker border for a more cohesive look */
+    font-size: 0.9rem;
+    color: #f0f0f0;
+}
+
+.LeaderboardTable th {
+    background-color: #007bff; /* Consistent blue color for header */
+    color: #ffffff;
+    font-weight: bold;
+}
+
+.LeaderboardTable td {
+    background-color: #3e3e3e;
+    color: #f0f0f0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ScoreValue {
+    margin-left: 0.5rem;
+    font-weight: bold;
+    color: #ffeb3b; /* Yellow color for score value */
+}
+
+@media (max-width: 768px) {
+    .LeaderboardContainer {
+        padding: 1rem;
+    }
+
+    .Title h1 {
+        font-size: 1.4rem;
+    }
+
+    .ButtonObject button {
+        width: 5rem;
+        height: 2rem;
+    }
+
+    .LeaderboardTable th, .LeaderboardTable td {
+        padding: 0.4rem;
+        font-size: 0.8rem;
+    }
+}
