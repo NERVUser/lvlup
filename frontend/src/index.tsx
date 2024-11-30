@@ -14,6 +14,7 @@ import PrivateRoutes from './utils/PrivateRoutes';
 import GlobalProvider from './context/GlobalProvider';
 import RecommendationsPage from './Recommendations/Recommendations';
 import LeaderboardStream from './LeaderboardStream/LeaderboardStream';
+import './index.css'
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
