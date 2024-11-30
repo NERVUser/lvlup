@@ -1,24 +1,31 @@
-import { ListItem, ListItemText, Button } from '@mui/material'
+import { ListItemText, Button, ListItemButton } from '@mui/material'
 import React from 'react'
 
 interface WorkoutComponentProps {
-    key: number
+    key: number;
+    selectedName: string;
     exerciseName: string;
     caloriesBurned: number;
-    isSelected: boolean;
+    duration: number;
+    handleClick: (name: string, burnedCalories: number, duration: number) => void;
 }
 
-function FetchedWorkoutComponent({ key, exerciseName, caloriesBurned, isSelected }: WorkoutComponentProps) {
+function FetchedWorkoutComponent({ key, selectedName, exerciseName, caloriesBurned, duration, handleClick }: WorkoutComponentProps) {
   return (
-    <ListItem key={key}>
+    <ListItemButton 
+      key={key} 
+      sx={{ backgroundColor: 'white', border: 'solid 2px black', borderRadius: '10px', marginBottom: '10px' }}
+      onClick={() => handleClick(exerciseName, caloriesBurned, duration)}  
+      selected={exerciseName === selectedName}
+    >
       <ListItemText 
         primary={exerciseName} 
         secondary={`Calories Burned: ${caloriesBurned}`} 
-        // primaryTypographyProps={{ style: { color: '#000000' } }} 
-        // secondaryTypographyProps={{ style: { color: '#000000' } }} 
+        primaryTypographyProps={{ style: { color: '#000000' } }} 
+        secondaryTypographyProps={{ style: { color: '#A9A9A9' } }}
+        sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }} 
       />
-      <Button>Add Exercise</Button>
-    </ListItem>
+    </ListItemButton>
   )
 }
 

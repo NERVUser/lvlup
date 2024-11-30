@@ -1,12 +1,16 @@
 import { createClient } from '@supabase/supabase-js';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { AddWeightData, UpdateUserData } from './supabaseTypes';
+import { AddExerciseData, AddWeightData, AddWorkoutData, UpdateUserData } from './supabaseTypes';
 import { format } from 'date-fns';
 
 const supabaseUrl = 'https://tlssadzfzfxcufxvijlt.supabase.co'
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRsc3NhZHpmemZ4Y3VmeHZpamx0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzEzNzEzODcsImV4cCI6MjA0Njk0NzM4N30.UNXzMbLvruACs5RdXp_Vy9N5ZPKkASbZlb41KnpcUu0';
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
+
+// need to get current day and add it to our new date, 
+// stored globally for all supabase functions
+const created_at = format(new Date(), 'yyyy-MM-dd');
 
 //used to create a user, first in auth, then in our database
 export const createUser = async (email: string, password: string) => {
@@ -98,10 +102,6 @@ export const useUpdateUser = () => {
         .eq('id', data.id)
         .select()
         .single();
-      
-        
-      // need to get current day and add it to our new date
-      const created_at = format(new Date(), 'yyyy-MM-dd');
         
       // now we need to update the weight table for the user
       const { error: weightError, data: userWeights } = await supabase
@@ -152,8 +152,6 @@ export const useAddUserWeight = () => {
 
   return useMutation<void, Error, AddWeightData>({
     mutationFn: async (data: AddWeightData) => {
-      // need to get current day and add it to our new date
-      const created_at = format(new Date(), 'yyyy-MM-dd');
 
       const { error } = await supabase
         .from('weights')
@@ -206,6 +204,64 @@ export const useGetWorkoutExercises = (id: string | undefined) => {
         throw new Error(error.message);
       return data;
     }
+  })
+}
+
+// add workout to database
+export const useAddWorkout = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<AddWorkoutData, Error, AddWorkoutData>({
+    mutationFn: async (data: AddWorkoutData) => {
+      const { error, data: newWorkoutData } = await supabase
+        .from('workouts')
+        .insert({
+          created_at: created_at,
+          name: data.workoutName,
+          user_id: data.user_id,
+        })
+        .select('*')
+        .single();
+
+        if(error)
+          throw new Error(error.message);
+
+        return newWorkoutData;
+    },
+    async onSuccess() {
+      queryClient.invalidateQueries({ queryKey: ['workouts']});
+    }
+  })
+}
+
+//adds exercise to database
+export const useAddExercise = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<AddExerciseData, Error, AddExerciseData>({
+    mutationFn: async (data: AddExerciseData) => {
+      const { error, data: newExerciseData } = await supabase
+        .from('exercises')
+        .insert({
+          workout_id: data.workout_id,
+          name: data.exerciseName,
+          duration: data.duration,
+          calories_burned: data.calories_burned,
+          created_at: created_at,
+          weight: data.exerciseWeight,
+          reps: data.exerciseReps,
+          sets: data.exerciseSets,
+        })
+        .select('*')
+        .single();
+
+      if(error)
+        throw new Error(error.message);
+      return newExerciseData
+    },
+    // async onSuccess({ workout_id }) {
+    //   queryClient.invalidateQueries({ queryKey: ['workouts'], workout_id })
+    // }
   })
 }
 

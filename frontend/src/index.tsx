@@ -13,7 +13,10 @@ import SideNav from './SideNav/SideNav';
 import PrivateRoutes from './utils/PrivateRoutes';
 import GlobalProvider from './context/GlobalProvider';
 import RecommendationsPage from './Recommendations/Recommendations';
-import './index.css'
+import LeaderboardStream from './LeaderboardStream/LeaderboardStream';
+
+// Create a default MUI theme (you can customize this later if needed)
+const theme = createTheme();
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -50,6 +53,7 @@ root.render(
               <Route element={<Layout><FoodJournal /></Layout>} path='/foodjournal' />
               <Route element={<Layout><AccountSetup /></Layout>} path='/accountsetup' />
               <Route element={<Layout><RecommendationsPage /></Layout>} path='/recommendations' />
+              <Route element={<Layout><LeaderboardStream leaderboardData={[]} /></Layout>} path='/Leaderboards' />
             </Route>
           </Routes>
         </BrowserRouter>
