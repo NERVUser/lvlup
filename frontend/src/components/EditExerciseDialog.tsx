@@ -1,7 +1,9 @@
 import { Dialog, DialogTitle, DialogContent, DialogActions, Button, Box, TextField } from '@mui/material'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useUpdateExercise } from '../lib/supabase';
 
 type FormProps = {
+  id: string;
   exerciseName: string;
   duration: number;
   calories_burned: number;
@@ -11,21 +13,60 @@ type FormProps = {
 }
 
 interface EditDialogProps {
-  index: number;
   editDialogOpen: boolean;
   setEditDialogOpen: (newValue: boolean) => void;
-  exerciseForm: FormProps;
-  handleSaveEdit: (exerciseForm: FormProps[]) => any;
+  exercise: FormProps;
+  setExercise: (e: FormProps) => void;
 }
 
-function EditExerciseDialog({ index, editDialogOpen, setEditDialogOpen, exerciseForm, handleSaveEdit  }: EditDialogProps) {
+function EditExerciseDialog({ editDialogOpen, setEditDialogOpen, exercise, setExercise  }: EditDialogProps) {
+  const { mutate: updateExercise } = useUpdateExercise();
 
-  const [localForm, setLocalForm] = useState(exerciseForm);
+  const [isLoading, setIsLoading] = useState(false);
+  const [localForm, setLocalForm] = useState(exercise);
+
+  useEffect(() => {
+    setLocalForm(exercise);
+  }, [exercise]);
+
+  function handleSaveEditExercise () {
+    setIsLoading(true);
+
+    try {
+      // update our exercise in the backend
+      updateExercise({
+        id: localForm.id,
+        exerciseName: localForm.exerciseName,
+        duration: localForm.duration,
+        calories_burned: localForm.calories_burned,
+        exerciseSets: localForm.exerciseSets,
+        exerciseReps: localForm.exerciseReps,
+        exerciseWeight: localForm.exerciseWeight,
+      })
+
+      setEditDialogOpen(false);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  // function handleDeleteExercise () {
+  //   setIsLoading(true);
+    
+  //   try {
+  //     deleteExercise({
+  //       id: exerciseForm.id
+  //     })
+  //   } catch (error) {
+  //     alert(error);
+  //   }
+  // }
 
   //reset our form and close our dialog
   function handleCancelDialog () {
     setEditDialogOpen(false);
     setLocalForm({
+      id: '',
       exerciseName: "",
       duration: 60,
       calories_burned: 0,
@@ -35,7 +76,7 @@ function EditExerciseDialog({ index, editDialogOpen, setEditDialogOpen, exercise
     })
   }
 
-  function handleSaveEditt () {
+  function handleSaveEdit () {
     
 
     setEditDialogOpen(false);
@@ -49,7 +90,7 @@ function EditExerciseDialog({ index, editDialogOpen, setEditDialogOpen, exercise
         label="Exercise Name"
         fullWidth
         margin="dense"
-        value={exerciseForm.exerciseName}
+        value={localForm.exerciseName}
         onChange={(e) => setLocalForm({... localForm, exerciseName: e.target.value})}
       />
       <TextField
@@ -57,7 +98,7 @@ function EditExerciseDialog({ index, editDialogOpen, setEditDialogOpen, exercise
         type="number"
         fullWidth
         margin="dense"
-        value={exerciseForm.duration}
+        value={localForm.duration || ''}
         onChange={(e) => setLocalForm({... localForm, duration: Number(e.target.value)})}
       />
       <TextField
@@ -65,7 +106,7 @@ function EditExerciseDialog({ index, editDialogOpen, setEditDialogOpen, exercise
         type="number"
         fullWidth
         margin="dense"
-        value={exerciseForm.calories_burned}
+        value={localForm.calories_burned || ''}
         onChange={(e) => setLocalForm({... localForm, calories_burned: Number(e.target.value)})}
       />
       <Box sx={{ display: 'flex', gap: '12px' }}>
@@ -74,7 +115,7 @@ function EditExerciseDialog({ index, editDialogOpen, setEditDialogOpen, exercise
           fullWidth
           margin="dense"
           type='number'
-          value={exerciseForm.exerciseSets}
+          value={localForm.exerciseSets || ''}
           onChange={(e) => setLocalForm({... localForm, exerciseSets: Number(e.target.value)})}
         />
         <TextField
@@ -82,15 +123,15 @@ function EditExerciseDialog({ index, editDialogOpen, setEditDialogOpen, exercise
           fullWidth
           margin="dense"
           type='number'
-          value={exerciseForm.exerciseReps}
-          onChange={(e) => setLocalForm({... localForm, exerciseReps: Number(e.target.value)})}
+          value={localForm.exerciseReps || ''}
+          onChange={(e) => setLocalForm({...localForm, exerciseReps: Number(e.target.value)})}
         />
         <TextField
           label="Weight"
           fullWidth
           margin="dense"
           type='number'
-          value={exerciseForm.exerciseWeight}
+          value={localForm.exerciseWeight || ''}
           onChange={(e) => setLocalForm({... localForm, exerciseWeight: Number(e.target.value)})}
         />
       </Box>
@@ -99,7 +140,7 @@ function EditExerciseDialog({ index, editDialogOpen, setEditDialogOpen, exercise
           <Button onClick={handleCancelDialog} color="secondary">
               Cancel
           </Button>
-          <Button onClick={() => handleSaveEditt()} color="primary" variant="contained">
+          <Button onClick={handleSaveEditExercise} color="primary" variant="contained">
               Save Changes
           </Button>
       </DialogActions>

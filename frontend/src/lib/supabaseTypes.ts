@@ -23,12 +23,29 @@ export interface AddWorkoutData {
 }
 
 // used for new exercises
-export interface AddExerciseData {
+export interface ExerciseData {
   workout_id: string | undefined;
+  user_id: string | undefined;
   exerciseName: string;
   duration: number;
   calories_burned: number;
   exerciseSets: number | undefined;
   exerciseReps: number | undefined;
   exerciseWeight: number | undefined;
+}
+
+// used for updating exercises
+export interface UpdateExerciseData {
+  id: string | undefined;
+  exerciseName: string;
+  duration: number;
+  calories_burned: number;
+  exerciseSets: number | undefined;
+  exerciseReps: number | undefined;
+  exerciseWeight: number | undefined;
+}
+
+// use for deleting exercises
+export interface DeleteExerciseData {
+  id: string | undefined;
 }

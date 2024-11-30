@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { AddExerciseData, AddWeightData, AddWorkoutData, UpdateUserData } from './supabaseTypes';
+import { ExerciseData, AddWeightData, AddWorkoutData, DeleteExerciseData, UpdateUserData, UpdateExerciseData } from './supabaseTypes';
 import { format } from 'date-fns';
 
 const supabaseUrl = 'https://tlssadzfzfxcufxvijlt.supabase.co'
@@ -190,15 +190,33 @@ export const useGetUserWorkouts = (id: string | undefined) => {
   })
 }
 
-// get all exercises associated with a particular workout
-export const useGetWorkoutExercises = (id: string | undefined) => {
+// get all exercises associated with a user
+export const useGetUserExercises = (id: string | undefined) => {
   return useQuery({
     queryKey: ['exercises', id],
     queryFn: async () => {
       const { error, data } = await supabase
         .from('exercises')
         .select('*')
-        .eq('workout_id', id);
+        .eq('user_id', id);
+
+      if(error)
+        throw new Error(error.message);
+
+      return data;
+    }
+  })
+}
+
+// get all exercises associated with a particular workout
+export const useGetWorkoutExercises = (id: string | undefined, p0: { enabled: boolean; }) => {
+  return useQuery({
+    queryKey: ['exercises', id],
+    queryFn: async () => {
+      const { error, data } = await supabase
+        .from('exercises')
+        .select('*')
+        .eq('_id', id);
 
       if(error)
         throw new Error(error.message);
@@ -238,12 +256,13 @@ export const useAddWorkout = () => {
 export const useAddExercise = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<AddExerciseData, Error, AddExerciseData>({
-    mutationFn: async (data: AddExerciseData) => {
+  return useMutation<ExerciseData, Error, ExerciseData>({
+    mutationFn: async (data: ExerciseData) => {
       const { error, data: newExerciseData } = await supabase
         .from('exercises')
         .insert({
           workout_id: data.workout_id,
+          user_id: data.user_id,
           name: data.exerciseName,
           duration: data.duration,
           calories_burned: data.calories_burned,
@@ -261,6 +280,55 @@ export const useAddExercise = () => {
     },
     // async onSuccess({ workout_id }) {
     //   queryClient.invalidateQueries({ queryKey: ['workouts'], workout_id })
+    // }
+  })
+}
+
+// update exercise from database 
+export const useUpdateExercise = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, UpdateExerciseData>({
+    mutationFn: async (data: UpdateExerciseData) => {
+      console.log('Data', data)
+      const { error } = await supabase
+        .from('exercises')
+        .update({
+          name: data.exerciseName,
+          duration: data.duration,
+          calories_burned: data.calories_burned,
+          sets: data.exerciseSets,
+          reps: data.exerciseReps,
+          weight: data.exerciseWeight,
+        })
+        .eq('id', data.id);
+
+      if (error)
+        throw new Error(error.message);
+    },
+    // onSuccess: () => {
+    //   queryClient.invalidateQueries(['exercises']);
+    // }
+  })
+}
+
+
+// delete exercise from database 
+export const useDeleteExercise = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, DeleteExerciseData>({
+    mutationFn: async (data: DeleteExerciseData) => {
+      const { error } = await supabase
+        .from('exercises')
+        .delete()
+        .eq('id', data.id);
+
+      if (error)
+        throw new Error(error.message);
+    },
+    // onSuccess: () => {
+    //   queryClient.invalidateQueries(['exercises']);
     // }
   })
 }

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import {
     Button,
     Card,
@@ -26,7 +25,7 @@ import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import './WorkoutJournal.css';
-import { useAddExercise, useAddUserWeight, useAddWorkout, useGetUserWeights, useGetUserWorkouts, useGetWorkoutExercises } from '../lib/supabase';
+import { useAddExercise, useAddUserWeight, useAddWorkout, useGetUserExercises, useGetUserWeights, useGetUserWorkouts, useGetWorkoutExercises } from '../lib/supabase';
 import { useGlobalContext } from '../context/GlobalProvider';
 import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval, parseISO, format, add } from 'date-fns';
 import FetchedWorkoutComponent from '../components/FetchedWorkoutComponent';
@@ -46,6 +45,7 @@ type WeeklyDataPoint = {
 };
 
 type ExerciseProp = {
+  id: string;
   exerciseName: string;
   duration: number;
   calories_burned: number;
@@ -61,6 +61,13 @@ interface FetchedWorkout {
   total_calories: number;
 }
 
+type WorkoutProp = {
+  id: string;
+  created_at: string;
+  name: string;
+  user_id: string;
+}
+
 // const fetchedWorkouts: FetchedWorkout[] | null = [];
 
 // Register chart components
@@ -68,20 +75,21 @@ ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, T
 
 const WorkoutJournal = () => {
     const [isLoading, setIsLoading] = useState(false);
-    const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+    const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     const [newWeight, setNewWeight] = useState(0);
 
     const [totalCalories, setTotalCalories] = useState<number | null>(0);
     const calorieGoal = 1000; // Set the new calorie goal for 1 loop
     const [totalCaloriesPercentage, setTotalCaloriesPercentage] = useState(0);
+    const [totalDuration, setTotalDuration] = useState(0);
 
-    const [time, setTime] = useState<number | null>(null);
-    const todayDate = format(new Date(), 'yyyy-MM-dd');
     const [newWorkoutName, setNewWorkoutName] = useState('');
-    //stores all exercises that belong to particular workout
+    //stores all exercises locally that belong to particular workout
     const [exercises, setExercises] = useState<ExerciseProp []>([]);
+    const [newExercises, setNewExercises] = useState<ExerciseProp[]>([]);
     // form for the current workout being inputted
     const [addExerciseForm, setAddExerciseForm] = useState({
+      id: '',
       exerciseName: "",
       duration: 60,
       calories_burned: 0,
@@ -90,6 +98,7 @@ const WorkoutJournal = () => {
       exerciseWeight: 0
     })
 
+    const [curWorkout, setCurWorkout] = useState<WorkoutProp | null>(null);
     const [fetchedWorkouts, setFetchedWorkouts] = useState<FetchedWorkout[] | null>(null);
     // used to toggle between searching for a workout and manually entering a new workout
     const [toggledWorkoutType, setToggledWorkoutType] = useState(true);
@@ -99,7 +108,10 @@ const WorkoutJournal = () => {
     const { user } = useGlobalContext();
     const { data: userWeights } = useGetUserWeights(user?.id) as { data: UserWeight[] | undefined};
     const { data: userWorkouts } = useGetUserWorkouts(user?.id);
-    const [curWorkout, setCurWorkout] = useState(null);
+    const { data: userExercises } = useGetUserExercises(user?.id);
+    // const { data: workoutExercises, refetch } = useGetWorkoutExercises(curWorkout?.id, {
+    //   enabled: !!curWorkout?.id
+    // });
 
 
     // mutations for adding new database entries
@@ -110,46 +122,62 @@ const WorkoutJournal = () => {
     const [addWeightDialog, setAddWeightDialog] = useState(false);
     const [openDialog, setOpenDialog] = useState(false);
     const [editDialogOpen, setEditDialogOpen] = useState(false);
+    const [selectedExercise, setSelectedExercise] = useState<ExerciseProp>({
+      id: '',
+      exerciseName: "",
+      duration: 60,
+      calories_burned: 0,
+      exerciseSets: 0,
+      exerciseReps: 0,
+      exerciseWeight: 0
+    });
+
     const [editWorkoutDialogOpen, setEditWorkoutDialogOpen] = useState(false);
 
-    useEffect(() => {
-        const fetchWorkoutData = async () => {
-            if (selectedDate) {
-                const dateKey = selectedDate.toISOString().split('T')[0];
-                try {
-                    const response = await axios.get(`/api/workouts/${dateKey}`);
-                    if (response.data) {
-                        // setCalories(response.data.calories);
-                        setTime(response.data.time);
-                        // setExercises(response.data.exercises);
-                    } else {
-                        // setCalories(null);
-                        setTime(null);
-                        // setExercises([]);
-                    }
-                } catch (error) {
-                    console.error("Error fetching workout data:", error);
-                }
-            }
-        };
-        fetchWorkoutData();
-    }, [selectedDate]);
-
     // this hook grabs all exercises for a particular workout
+    // this gets called each time our current workout changes
     useEffect(() => {
       // if the user has existing workout and one of the workouts is today, set our current user workout to that
-      let todayWorkoutId;
       if(userWorkouts) {
-        const todayWorkouts = userWorkouts.filter((workout) => workout.created_at === todayDate);
-        console.log('Workouts today: ', todayWorkouts);
-        // if(todayWorkouts)
-        //   setCurWorkout(todayWorkouts[0]);
-             todayWorkoutId = todayWorkouts[0];
+        const formattedDate = format(selectedDate, 'yyyy-MM-dd');
+        const todayWorkouts = userWorkouts.filter((workout) => workout.created_at === formattedDate);
+        if(todayWorkouts)
+          setCurWorkout(todayWorkouts[0]);
+        // refetch();
       }
-      // const { data: allWorkoutExercises } = useGetWorkoutExercises(todayWorkoutId);
       
 
-    }, [userWorkouts]);
+    }, [curWorkout]);
+
+    // need to recalculate total calories each time our date changes
+    useEffect(() => {
+      if(userExercises) {
+        //format our selected date first
+        const formattedDate = format(selectedDate, 'yyyy-MM-dd');
+        //filter our exercises and then compute our sums
+        const filteredExercises = userExercises
+          .filter((ex) => ex.created_at === formattedDate)
+          .map((ex) => ({
+            id: ex.id,
+            exerciseName: ex.name,
+            exerciseSets: ex.sets,
+            exerciseReps: ex.reps,
+            exerciseWeight: ex.weight,
+            calories_burned: ex.calories_burned,
+            duration: ex.duration,
+          }));
+        const totalCals = filteredExercises.reduce((total, ex) => total + ex.calories_burned, 0);
+        const totalDuration = filteredExercises.reduce((total, ex) => total + ex.duration, 0);
+
+        // now update our variables
+        setExercises(filteredExercises);
+        setTotalCalories(totalCals);
+        setTotalDuration(totalDuration);
+        if(totalCalories)
+          setTotalCaloriesPercentage((totalCalories / calorieGoal) * 100)
+
+      }
+    }, [selectedDate, userExercises]);
     
     const handleCancelWeightDialog = () => {
       setNewWeight(0);
@@ -171,7 +199,22 @@ const WorkoutJournal = () => {
     }
 
     const handleAddWorkout = () => setOpenDialog(true);
-    const handleCloseDialog = () => setOpenDialog(false);
+    const handleCloseDialog = () => {
+      // reset all fields and close our dialog
+      setNewWorkoutName('');
+      setAddExerciseForm({
+        id: '',
+        exerciseName: "",
+        duration: 60,
+        calories_burned: 0,
+        exerciseSets: 0,
+        exerciseReps: 0,
+        exerciseWeight: 0
+      })
+      setNewExercises([]);
+      setOpenDialog(false);
+    }
+      
 
     const fetchWorkout = async (activity: string, duration: number) => {
       setIsLoading(true);
@@ -218,10 +261,11 @@ const WorkoutJournal = () => {
         return alert("Please fill in all fields");
 
       // add our new exercise
-      setExercises((prevExercises) => [...prevExercises, exercise]);
+      setNewExercises((prevExercises) => [...prevExercises, exercise]);
 
       //clear our form
       setAddExerciseForm({
+        id: '',
         exerciseName: "",
         duration: 60,
         calories_burned: 0,
@@ -264,6 +308,7 @@ const WorkoutJournal = () => {
           // now we need to add our exercise, use workout id from above
           addExercise({
             workout_id: newWorkout.id,
+            user_id: user?.id,
             exerciseName: newWorkoutName,
             duration: addExerciseForm.duration,
             calories_burned: addExerciseForm.calories_burned,
@@ -282,6 +327,7 @@ const WorkoutJournal = () => {
         exercises.map(exercise => {
           addExercise({
             workout_id: newWorkout.id,
+            user_id: user?.id,
             exerciseName: exercise.exerciseName,
             duration: exercise.duration,
             calories_burned: exercise.calories_burned,
@@ -294,6 +340,7 @@ const WorkoutJournal = () => {
 
       // now reset our fields
       setAddExerciseForm({
+        id: '',
         exerciseName: "",
         duration: 60,
         calories_burned: 0,
@@ -301,26 +348,8 @@ const WorkoutJournal = () => {
         exerciseReps: 0,
         exerciseWeight: 0
       })
+      setNewExercises([]);
       setOpenDialog(false);
-    };
-
-    const handleEditExercise = (index: number) => {
-        setEditIndex(index);
-        // setAddExerciseForm({...addExerciseForm, exercises[index].exerciseName });
-        // setExerciseSets(exercises[index].sets);
-        setEditDialogOpen(true);
-    };
-
-    const handleSaveEditExercise = () => {
-        if (editIndex !== null) {
-            const updatedExercises = [...exercises];
-            // updatedExercises[editIndex] = { name: exerciseName, sets: exerciseSets };
-            // setExercises(updatedExercises);
-            setEditIndex(null);
-            // setExerciseName('');
-            // setExerciseSets('');
-            setEditDialogOpen(false);
-        }
     };
 
     const handleDeleteExercise = (index: number) => {
@@ -328,20 +357,12 @@ const WorkoutJournal = () => {
         // setExercises(updatedExercises);
         if (updatedExercises.length === 0) {
             setTotalCalories(0);
-            setTime(null);
+            setTotalDuration(0);
         }
     };
 
-    const handleEditWorkout = () => {
+    const handleEditWorkout = (exercise: ExerciseProp) => {
         setEditWorkoutDialogOpen(false);
-        type FormProps = {
-          exerciseName: string;
-          duration: number;
-          calories_burned: number;
-          exerciseSets: number;
-          exerciseReps: number;
-          exerciseWeight: number;
-        }
     };
 
     const handleSaveEditWorkout = async () => {
@@ -478,74 +499,86 @@ const WorkoutJournal = () => {
         {/* Bottom-Left: Exercises List */}
         <Card>
           <CardContent>
-            <Typography variant="h6">Exercises</Typography>
-            <List className="exercise-list">
-            {exercises.map((exercise, index) => (
-              <ListItem key={index}>
-                <ListItemText 
-                  // primary={exercise.name} 
-                  // secondary={exercise.sets} 
-                  primaryTypographyProps={{ style: { color: '#000000' } }} 
-                  secondaryTypographyProps={{ style: { color: '#000000' } }} 
-                />
-                <IconButton aria-label="edit" onClick={() => handleEditExercise(index)}>
-                <EditIcon />
-                </IconButton>
-                <IconButton aria-label="delete" onClick={() => handleDeleteExercise(index)}>
-                  <DeleteIcon />
-                </IconButton>
-              </ListItem>
-            ))}
-            </List>
+            <Typography variant="h6">Exercises on {format(selectedDate, 'MMM d, yyyy')}</Typography>
+            {exercises.length > 0 ? (
+              <List className="exercise-list">
+                {exercises?.map((exercise, index) => (
+                  <Box>
+                    <ExerciseContainer
+                      key={index}
+                      exercise={exercise}
+                      setExercises={setExercises}
+                      toggleDialog={(open) => {
+                        setEditDialogOpen(open);
+                        setSelectedExercise(exercise);
+                      }}
+                    />
+                    <EditExerciseDialog
+                      editDialogOpen={editDialogOpen}
+                      setEditDialogOpen={setEditDialogOpen}
+                      exercise={selectedExercise}
+                      setExercise={setSelectedExercise}
+                    />
+                  </Box>
+                ))}
+              </List>
+            ) : (
+              <Typography variant='h6' color='gray'>No exercises yet</Typography>
+            )
+            }
               <Button
                 variant="contained"
                 color="primary"
                 fullWidth
                 style={{ marginTop: '20px' }}
                 onClick={handleAddWorkout}
-                >
-                  Add Workout
+              >
+                Add Workout
               </Button>
           </CardContent>
         </Card>
 
-          {/* Bottom-Right: Calories and Time */}
-          <Card>
-            <CardContent style={{ textAlign: 'center' }}>
-              <Typography variant="h6">Today's Workout</Typography>
-              <div style={{ position: 'relative', display: 'inline-flex' }}>
-                <CircularProgress
-                  variant="determinate"
-                  value={totalCaloriesPercentage}
-                  size={100}
-                  thickness={5}
-                  color={totalCaloriesPercentage > 100 ? 'primary' : 'warning'}
-                />
-                <div style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  bottom: 0,
-                  right: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexDirection: 'column'
-                }}>
-                <Typography variant="h5">{totalCalories !== null ? totalCalories : 0}</Typography>
-                <Typography variant="caption">Calories</Typography>
-                </div>
-              </div>
-              <div style={{ marginTop: '20px' }}>
-                <Typography variant="h5">{time !== null ? time : 0} Minutes</Typography>
-              </div>
-              {totalCalories !== null && time !== null && (
-                <IconButton aria-label="edit" onClick={handleEditWorkout} style={{ marginTop: '10px' }}>
-                  <EditIcon />
-                </IconButton>
-              )}
-            </CardContent>
-          </Card>
+        {/* Bottom-Right: Calories and Time */}
+        <Card>
+          <CardContent style={{ textAlign: 'center', alignItems: 'center', justifyContent: 'center' }}>
+            <Typography variant="h6">Today's Workout</Typography>
+            <div style={{ position: 'relative', display: 'inline-flex' }}>
+              <CircularProgress
+                variant="determinate"
+                value={totalCaloriesPercentage <= 100 ? totalCaloriesPercentage : 100}
+                size={100}
+                thickness={5}
+                color={totalCaloriesPercentage > 100 ? 'success' : 
+                  totalCaloriesPercentage > 50 ? 
+                  'warning' : 
+                  'error'
+                }
+              />
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                bottom: 0,
+                right: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexDirection: 'column'
+              }}>
+              <Typography variant="h5">{totalCalories !== null ? totalCalories : 0}</Typography>
+              <Typography variant="caption">Calories</Typography>
+            </div>
+            </div>
+            <div style={{ marginTop: '20px' }}>
+              <Typography variant="h5">{totalDuration} Minutes</Typography>
+            </div>
+            {/* {totalCalories !== null && totalDuration !== null && (
+              <IconButton aria-label="edit" onClick={handleEditWorkout} style={{ marginTop: '10px' }}>
+                <EditIcon />
+              </IconButton>
+            )} */}
+          </CardContent>
+        </Card>
 
         {/* Add Weight Dialog */}
         <Dialog open={addWeightDialog} onClose={() => setAddWeightDialog(false)}>
@@ -556,7 +589,7 @@ const WorkoutJournal = () => {
               type='number'
               fullWidth
               margin='dense'
-              value={newWeight}
+              value={newWeight || ''}
               onChange={(e) => setNewWeight(parseFloat(e.target.value))}
             />
           </DialogContent>
@@ -591,7 +624,7 @@ const WorkoutJournal = () => {
                 type="number"
                 fullWidth
                 margin="dense"
-                value={addExerciseForm.duration}
+                value={addExerciseForm.duration || ''}
                 onChange={(e) => setAddExerciseForm({... addExerciseForm, duration: Number(e.target.value)})}
               />
               <Box sx={{ width: '93px', display: 'flex', justifyContent: 'center' }}>
@@ -681,28 +714,16 @@ const WorkoutJournal = () => {
               </Button>
 
               { /* list all exercises already filled out */ }
-              {exercises.length > 0 && 
+              {newExercises.length > 0 && 
                 <List sx={{ marginTop: '20px' }}>
                   <Typography variant='h5' color='black'>Current Exercises</Typography>
-                  {exercises?.map((exercise, index: number) => (
+                  {newExercises?.map((exercise, index: number) => (
                     <Box>
                       <ExerciseContainer
                         key={index}
-                        name={exercise.exerciseName}
-                        sets={exercise.exerciseSets}
-                        reps={exercise.exerciseReps}
-                        weight={exercise.exerciseWeight}
-                        calories={exercise.calories_burned}
-                        duration={exercise.duration}
+                        exercise={exercise}
+                        setExercises={setExercises}
                         toggleDialog={setEditDialogOpen}
-                      />
-                      <EditExerciseDialog
-                        index={index}
-                        editDialogOpen={editDialogOpen}
-                        setEditDialogOpen={setEditDialogOpen}
-                        exerciseForm={exercises[index]}
-                        handleSaveEdit={setExercises}
-                        // setExerciseForm={setExercises}
                       />
                     </Box>
                   ))}
@@ -711,7 +732,6 @@ const WorkoutJournal = () => {
             </DialogContent>
           )}
           
-
           <DialogActions>
             <Button onClick={handleCloseDialog} color="secondary">
               Cancel
