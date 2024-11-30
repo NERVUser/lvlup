@@ -15,9 +15,6 @@ import GlobalProvider from './context/GlobalProvider';
 import RecommendationsPage from './Recommendations/Recommendations';
 import LeaderboardStream from './LeaderboardStream/LeaderboardStream';
 
-// Create a default MUI theme (you can customize this later if needed)
-const theme = createTheme();
-
 const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div style={{display: 'flex'}}>
