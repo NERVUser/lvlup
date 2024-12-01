@@ -1,18 +1,27 @@
-import { ListItem, ListItemText, Typography, Box, Button } from '@mui/material';
-import React from 'react'
+import { ListItem, ListItemText, Typography, Box, IconButton } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import EditExerciseDialog from './EditExerciseDialog';
+
+type ExerciseProp = {
+  id: string;
+  exerciseName: string;
+  duration: number;
+  calories_burned: number;
+  exerciseSets: number;
+  exerciseReps: number;
+  exerciseWeight: number;
+}
 
 interface ExerciseContainerProp {
   key: number;
-  name: string;
-  sets: number | null;
-  reps: number | null;
-  weight: number | null;
-  calories: number | null;
-  duration: number | null;
+  exercise: ExerciseProp;
+  setExercises: (e: ExerciseProp[]) => void;
   toggleDialog: (bool: boolean) => void;
 }
 
-function ExerciseContainer({ key, name, sets, reps, weight, calories, duration, toggleDialog }: ExerciseContainerProp) {
+function ExerciseContainer({ key, exercise, toggleDialog }: ExerciseContainerProp) {
+
   return (
     <ListItem
       key={key}
@@ -27,15 +36,23 @@ function ExerciseContainer({ key, name, sets, reps, weight, calories, duration, 
       }}
     >
       <Box>
-        <Typography variant='h6' color='black'>{name}</Typography>
-        <Typography color='gray'>Calories Burned: {calories}</Typography>
+        <Typography variant='h6' color='black'>{exercise.exerciseName}</Typography>
+        <Typography color='gray'>Calories Burned: {exercise.calories_burned}</Typography>
       </Box>
       <Box>
-        <Typography color='black'>{sets} x {reps}, {weight} lbs</Typography>
-        <Typography color='gray'>Duration: {duration} min</Typography>
+        {exercise.exerciseSets && exercise.exerciseReps && exercise.exerciseWeight && <Typography color='black'>
+          {exercise.exerciseSets} x {exercise.exerciseReps}, {exercise.exerciseWeight} lbs
+        </Typography>}
+        <Typography color='gray'>Duration: {exercise.duration} min</Typography>
       </Box>
-      <Button variant='outlined' onClick={() => toggleDialog(true)}>Edit</Button>
-      
+      <Box>
+        <IconButton aria-label="edit" onClick={() => toggleDialog(true)}>
+          <EditIcon />
+        </IconButton>
+        <IconButton aria-label="delete" onClick={() => {}}>
+          <DeleteIcon />
+        </IconButton>
+      </Box>
     </ListItem>
   )
 }
