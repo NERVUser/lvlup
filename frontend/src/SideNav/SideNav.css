@@ -1,20 +1,31 @@
-.SideNav{
+.SideNav {
     min-height: 100%;
     min-width: 200px;
-    background-color: black;
+    background-color: #000000; /* Kept black background */
     position: relative;
     margin-left: 5px;
 }
-.MenuOptions{
-    color: white;
+
+.MenuOptions {
+    color: #f0f0f0; /* Changed to a lighter color for better contrast */
     margin-top: 2rem;
 }
-.MenuBar{
-    color: white;
+
+.MenuBar {
+    color: #ffffff; /* Ensure the top bar text is white for good contrast */
 }
-.MenuOptionsItem{
+
+.MenuOptionsItem {
     display: flex;
     align-items: center;
     font-family: 'Acari Sans', sans-serif;
     border: 2px solid red;
+    padding: 10px; /* Added padding for better spacing */
+    color: #f0f0f0; /* Text color updated for better readability */
+    transition: background-color 0.3s ease; /* Smooth transition for hover effect */
+}
+
+.MenuOptionsItem:hover {
+    background-color: #444444; /* Added hover effect for better UX */
+    cursor: pointer; /* Show pointer to indicate clickable items */
 }
