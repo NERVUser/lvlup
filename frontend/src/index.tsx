@@ -49,12 +49,12 @@ root.render(
             <Route element={<Signup />} path='/signup' />
 
             <Route element={<PrivateRoutes />}>
-              <Route element={<Layout><Feedpage /></Layout>} path='/feedpage' />
-              <Route element={<Layout><WorkoutJournal /></Layout>} path='/workoutjournal' />
-              <Route element={<Layout><FoodJournal /></Layout>} path='/foodjournal' />
-              <Route element={<Layout><AccountSetup /></Layout>} path='/accountsetup' />
-              <Route element={<Layout><RecommendationsPage /></Layout>} path='/recommendations' />
-              <Route element={<Layout><LeaderboardStream leaderboardData={[]} /></Layout>} path='/Leaderboards' />
+              <Route element={<Layout><Feedpage /></Layout>} path='/Feedpage' />
+              <Route element={<Layout><WorkoutJournal /></Layout>} path='/WorkoutJournal' />
+              <Route element={<Layout><FoodJournal /></Layout>} path='/FoodJournal' />
+              <Route element={<Layout><AccountSetup /></Layout>} path='/AccountSetup' />
+              <Route element={<Layout><RecommendationsPage /></Layout>} path='/Recommendations' />
+              <Route element={<Layout><LeaderboardStream leaderboardData={[]} /></Layout>} path='/Leaderboard' />
             </Route>
           </Routes>
         </BrowserRouter>
