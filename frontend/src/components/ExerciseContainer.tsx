@@ -2,6 +2,7 @@ import { ListItem, ListItemText, Typography, Box, IconButton } from '@mui/materi
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditExerciseDialog from './EditExerciseDialog';
+import { useDeleteExercise } from '../lib/supabase';
 
 type ExerciseProp = {
   id: string;
@@ -21,6 +22,21 @@ interface ExerciseContainerProp {
 }
 
 function ExerciseContainer({ key, exercise, toggleDialog }: ExerciseContainerProp) {
+
+  const { mutate: deleteExercise } = useDeleteExercise();
+
+  function handleDeleteExercise () {
+    
+    try {
+      deleteExercise({
+        id: exercise.id
+      })
+    } catch (error) {
+      alert(error);
+    } finally {
+      // toggleDialog;
+    }
+  }
 
   return (
     <ListItem
@@ -49,7 +65,7 @@ function ExerciseContainer({ key, exercise, toggleDialog }: ExerciseContainerPro
         <IconButton aria-label="edit" onClick={() => toggleDialog(true)}>
           <EditIcon />
         </IconButton>
-        <IconButton aria-label="delete" onClick={() => {}}>
+        <IconButton aria-label="delete" onClick={handleDeleteExercise}>
           <DeleteIcon />
         </IconButton>
       </Box>
