@@ -50,18 +50,6 @@ function EditExerciseDialog({ editDialogOpen, setEditDialogOpen, exercise, setEx
     }
   }
 
-  // function handleDeleteExercise () {
-  //   setIsLoading(true);
-    
-  //   try {
-  //     deleteExercise({
-  //       id: exerciseForm.id
-  //     })
-  //   } catch (error) {
-  //     alert(error);
-  //   }
-  // }
-
   //reset our form and close our dialog
   function handleCancelDialog () {
     setEditDialogOpen(false);

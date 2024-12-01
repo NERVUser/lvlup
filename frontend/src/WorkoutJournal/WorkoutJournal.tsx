@@ -23,7 +23,6 @@ import { DateCalendar } from '@mui/x-date-pickers';
 import { Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, ChartData, ChartOptions } from 'chart.js';
 import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
 import './WorkoutJournal.css';
 import { useAddExercise, useAddUserWeight, useAddWorkout, useGetUserExercises, useGetUserWeights, useGetUserWorkouts, useGetWorkoutExercises } from '../lib/supabase';
 import { useGlobalContext } from '../context/GlobalProvider';
@@ -31,6 +30,7 @@ import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval, par
 import FetchedWorkoutComponent from '../components/FetchedWorkoutComponent';
 import ExerciseContainer from '../components/ExerciseContainer';
 import EditExerciseDialog from '../components/EditExerciseDialog';
+import WorkoutComponent from '../components/WorkoutComponent';
 
 interface UserWeight {
     id: number;
@@ -100,6 +100,8 @@ const WorkoutJournal = () => {
 
     const [curWorkout, setCurWorkout] = useState<WorkoutProp | null>(null);
     const [fetchedWorkouts, setFetchedWorkouts] = useState<FetchedWorkout[] | null>(null);
+    // used for all workouts that match selected date
+    const [selectedWorkouts, setSelectedWorkouts] = useState<WorkoutProp[]>([]);
     // used to toggle between searching for a workout and manually entering a new workout
     const [toggledWorkoutType, setToggledWorkoutType] = useState(true);
     const [editIndex, setEditIndex] = useState<number | null>(null);
@@ -109,9 +111,6 @@ const WorkoutJournal = () => {
     const { data: userWeights } = useGetUserWeights(user?.id) as { data: UserWeight[] | undefined};
     const { data: userWorkouts } = useGetUserWorkouts(user?.id);
     const { data: userExercises } = useGetUserExercises(user?.id);
-    // const { data: workoutExercises, refetch } = useGetWorkoutExercises(curWorkout?.id, {
-    //   enabled: !!curWorkout?.id
-    // });
 
 
     // mutations for adding new database entries
@@ -143,7 +142,6 @@ const WorkoutJournal = () => {
         const todayWorkouts = userWorkouts.filter((workout) => workout.created_at === formattedDate);
         if(todayWorkouts)
           setCurWorkout(todayWorkouts[0]);
-        // refetch();
       }
       
 
@@ -151,9 +149,9 @@ const WorkoutJournal = () => {
 
     // need to recalculate total calories each time our date changes
     useEffect(() => {
+      const formattedDate = format(selectedDate, 'yyyy-MM-dd');
       if(userExercises) {
         //format our selected date first
-        const formattedDate = format(selectedDate, 'yyyy-MM-dd');
         //filter our exercises and then compute our sums
         const filteredExercises = userExercises
           .filter((ex) => ex.created_at === formattedDate)
@@ -166,15 +164,22 @@ const WorkoutJournal = () => {
             calories_burned: ex.calories_burned,
             duration: ex.duration,
           }));
-        const totalCals = filteredExercises.reduce((total, ex) => total + ex.calories_burned, 0);
-        const totalDuration = filteredExercises.reduce((total, ex) => total + ex.duration, 0);
+          const totalCals = filteredExercises.reduce((total, ex) => total + ex.calories_burned, 0);
+          const totalDuration = filteredExercises.reduce((total, ex) => total + ex.duration, 0);
 
         // now update our variables
         setExercises(filteredExercises);
         setTotalCalories(totalCals);
         setTotalDuration(totalDuration);
-        if(totalCalories)
-          setTotalCaloriesPercentage((totalCalories / calorieGoal) * 100)
+        const percentage = totalCals === 0 ? 0 : ((totalCals / calorieGoal) * 100)
+        setTotalCaloriesPercentage(percentage);
+
+      }
+
+      // also filter our workouts for only those on the selected date
+      if(userWorkouts) {
+        const filteredWorkouts = userWorkouts.filter(ex => ex.created_at === formattedDate);
+        setSelectedWorkouts(filteredWorkouts)
 
       }
     }, [selectedDate, userExercises]);
@@ -352,31 +357,6 @@ const WorkoutJournal = () => {
       setOpenDialog(false);
     };
 
-    const handleDeleteExercise = (index: number) => {
-        const updatedExercises = exercises.filter((_, i) => i !== index);
-        // setExercises(updatedExercises);
-        if (updatedExercises.length === 0) {
-            setTotalCalories(0);
-            setTotalDuration(0);
-        }
-    };
-
-    const handleEditWorkout = (exercise: ExerciseProp) => {
-        setEditWorkoutDialogOpen(false);
-    };
-
-    const handleSaveEditWorkout = async () => {
-        if (selectedDate) {
-            const dateKey = selectedDate.toISOString().split('T')[0];
-            if (dateKey) {
-                try {
-                } catch (error) {
-                    console.error("Error saving workout data:", error);
-                }
-            }
-        }
-        setEditWorkoutDialogOpen(false);
-    };
 
     // this component creates the chart for the user's average weights througout the week
     const WeeklyDataChart = ({ userWeights }: { userWeights: UserWeight[] | undefined }) => {
@@ -541,11 +521,11 @@ const WorkoutJournal = () => {
         {/* Bottom-Right: Calories and Time */}
         <Card>
           <CardContent style={{ textAlign: 'center', alignItems: 'center', justifyContent: 'center' }}>
-            <Typography variant="h6">Today's Workout</Typography>
+            <Typography variant="h6">Workouts on {format(selectedDate, 'MMM d, yyyy')}</Typography>
             <div style={{ position: 'relative', display: 'inline-flex' }}>
               <CircularProgress
                 variant="determinate"
-                value={totalCaloriesPercentage <= 100 ? totalCaloriesPercentage : 100}
+                value={Math.min(totalCaloriesPercentage, 100)}
                 size={100}
                 thickness={5}
                 color={totalCaloriesPercentage > 100 ? 'success' : 
@@ -572,6 +552,11 @@ const WorkoutJournal = () => {
             <div style={{ marginTop: '20px' }}>
               <Typography variant="h5">{totalDuration} Minutes</Typography>
             </div>
+            <List className='exercise-list'>
+            {selectedWorkouts?.map((workout, index) => (
+              <WorkoutComponent key={index} workout={workout}/>
+            ))}
+            </List>
             {/* {totalCalories !== null && totalDuration !== null && (
               <IconButton aria-label="edit" onClick={handleEditWorkout} style={{ marginTop: '10px' }}>
                 <EditIcon />

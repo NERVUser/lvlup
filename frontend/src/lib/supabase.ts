@@ -193,7 +193,7 @@ export const useGetUserWorkouts = (id: string | undefined) => {
 // get all exercises associated with a user
 export const useGetUserExercises = (id: string | undefined) => {
   return useQuery({
-    queryKey: ['exercises', id],
+    queryKey: ['exercises'],
     queryFn: async () => {
       const { error, data } = await supabase
         .from('exercises')
@@ -209,14 +209,14 @@ export const useGetUserExercises = (id: string | undefined) => {
 }
 
 // get all exercises associated with a particular workout
-export const useGetWorkoutExercises = (id: string | undefined, p0: { enabled: boolean; }) => {
+export const useGetWorkoutExercises = (id: string | undefined) => {
   return useQuery({
     queryKey: ['exercises', id],
     queryFn: async () => {
       const { error, data } = await supabase
         .from('exercises')
         .select('*')
-        .eq('_id', id);
+        .eq('workout_id', id);
 
       if(error)
         throw new Error(error.message);
@@ -278,9 +278,10 @@ export const useAddExercise = () => {
         throw new Error(error.message);
       return newExerciseData
     },
-    // async onSuccess({ workout_id }) {
-    //   queryClient.invalidateQueries({ queryKey: ['workouts'], workout_id })
-    // }
+    async onSuccess({ workout_id }) {
+      queryClient.invalidateQueries({ queryKey: ['workout', workout_id] })
+      queryClient.invalidateQueries({ queryKey: ['exercies'] })
+    }
   })
 }
 
@@ -290,7 +291,6 @@ export const useUpdateExercise = () => {
 
   return useMutation<void, Error, UpdateExerciseData>({
     mutationFn: async (data: UpdateExerciseData) => {
-      console.log('Data', data)
       const { error } = await supabase
         .from('exercises')
         .update({
@@ -306,9 +306,9 @@ export const useUpdateExercise = () => {
       if (error)
         throw new Error(error.message);
     },
-    // onSuccess: () => {
-    //   queryClient.invalidateQueries(['exercises']);
-    // }
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['exercises'] });
+    }
   })
 }
 
@@ -327,9 +327,10 @@ export const useDeleteExercise = () => {
       if (error)
         throw new Error(error.message);
     },
-    // onSuccess: () => {
-    //   queryClient.invalidateQueries(['exercises']);
-    // }
+    onSuccess: () => {
+      // Invalidate queries to refresh exercise data
+      queryClient.invalidateQueries({ queryKey: ['exercises'] });
+    },
   })
 }
 
