@@ -1,0 +1,15 @@
+#topbar {
+    margin: 5px;
+    display: flex;
+    justify-content: space-between;
+}
+
+#closeBttn {
+    background-color: grey;
+    border: none;
+}
+
+#menuBttn {
+    background-color: none;
+    border: none;
+}

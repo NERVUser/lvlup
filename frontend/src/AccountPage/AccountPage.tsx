@@ -1,14 +1,10 @@
 import React from "react";
-import SideNav from "../SideNav/SideNav";
 import { Avatar } from "@mui/material";
 import "./AccountPage.css";
 
 export default function AccountPage() {
   return (
     <div className="AccountPage">
-      <div className="SideNavContainer">
-        <SideNav />
-      </div>
       <div className="Account">
         <div className="Header">
           <div className="UserInfo">

@@ -1,5 +1,4 @@
 import './Feedpage.css'
-import SideNav from '../SideNav/SideNav'
 
 export default function Feedpage () {
   return (

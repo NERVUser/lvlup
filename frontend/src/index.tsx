@@ -9,18 +9,19 @@ import WorkoutJournal from './WorkoutJournal/WorkoutJournal'
 import FoodJournal from './FoodJournal/FoodJournal'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import AccountSetup from './AccountSetup/AccountSetup';
-import SideNav from './SideNav/SideNav';
+import Topbar from './Topbar/Topbar';
 import PrivateRoutes from './utils/PrivateRoutes';
 import GlobalProvider from './context/GlobalProvider';
 import RecommendationsPage from './Recommendations/Recommendations';
 import LeaderboardStream from './LeaderboardStream/LeaderboardStream';
+import AccountPage from './AccountPage/AccountPage';
 import './index.css'
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <div style={{display: 'flex'}}>
-      <SideNav />
-      <div style={{flex: 1}}>
+    <div id="page">
+      <Topbar />
+      <div id="main-content">
         {children}
       </div>
     </div>
@@ -51,6 +52,7 @@ root.render(
               <Route element={<Layout><FoodJournal /></Layout>} path='/foodjournal' />
               <Route element={<Layout><AccountSetup /></Layout>} path='/accountsetup' />
               <Route element={<Layout><RecommendationsPage /></Layout>} path='/recommendations' />
+              <Route element={<Layout><AccountPage /></Layout>} path='/accountpage' />
               <Route element={<Layout><LeaderboardStream leaderboardData={[]} /></Layout>} path='/Leaderboards' />
             </Route>
           </Routes>
