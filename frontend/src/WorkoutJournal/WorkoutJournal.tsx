@@ -182,7 +182,7 @@ const WorkoutJournal = () => {
         setSelectedWorkouts(filteredWorkouts)
 
       }
-    }, [selectedDate, userExercises]);
+    }, [selectedDate, userExercises, userWorkouts]);
     
     const handleCancelWeightDialog = () => {
       setNewWeight(0);

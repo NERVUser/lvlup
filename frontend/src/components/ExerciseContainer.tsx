@@ -2,7 +2,8 @@ import { ListItem, ListItemText, Typography, Box, IconButton } from '@mui/materi
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditExerciseDialog from './EditExerciseDialog';
-import { useDeleteExercise } from '../lib/supabase';
+import { supabase, useDeleteExercise } from '../lib/supabase';
+import { useEffect, useState } from 'react';
 
 type ExerciseProp = {
   id: string;
@@ -23,13 +24,31 @@ interface ExerciseContainerProp {
 
 function ExerciseContainer({ key, exercise, toggleDialog }: ExerciseContainerProp) {
 
+  const [workoutId, setWorkoutId] = useState(undefined);
   const { mutate: deleteExercise } = useDeleteExercise();
+
+  // this grabs the workout id for our exercise, 
+  // will use this to find the number of exercises associated with a workout
+  async function getExerciseWorkout () {
+    const { data: workout } = await supabase
+      .from('exercises')
+      .select('workout_id')
+      .eq('id', exercise.id)
+      .single();
+
+      setWorkoutId(workout?.workout_id);
+  }
+
+  useEffect(() => {
+    getExerciseWorkout();
+  }, []);
 
   function handleDeleteExercise () {
     
     try {
       deleteExercise({
-        id: exercise.id
+        id: exercise.id,
+        workout_id: workoutId
       })
     } catch (error) {
       alert(error);

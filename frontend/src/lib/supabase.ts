@@ -319,17 +319,35 @@ export const useDeleteExercise = () => {
 
   return useMutation<void, Error, DeleteExerciseData>({
     mutationFn: async (data: DeleteExerciseData) => {
-      const { error } = await supabase
+      
+      
+      const { error: exerciseError } = await supabase
+      .from('exercises')
+      .delete()
+      .eq('id', data.id);
+      
+      // if this is the last exercise of a workout, just delete the workout
+      const { data: exercises } = await supabase
         .from('exercises')
-        .delete()
-        .eq('id', data.id);
+        .select('*')
+        .eq('workout_id', data.workout_id);
 
-      if (error)
-        throw new Error(error.message);
+      // if length is 0, we know that was the last exercise of that workout
+      if(exercises?.length === 0) {
+        const { error } = await supabase
+          .from('workouts')
+          .delete()
+          .eq('id', data.workout_id);
+      }
+
+
+      if (exerciseError)
+        throw new Error("Error deleting exercise");
     },
     onSuccess: () => {
       // Invalidate queries to refresh exercise data
       queryClient.invalidateQueries({ queryKey: ['exercises'] });
+      queryClient.invalidateQueries({ queryKey: ['workouts'] });
     },
   })
 }

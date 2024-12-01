@@ -48,4 +48,5 @@ export interface UpdateExerciseData {
 // use for deleting exercises
 export interface DeleteExerciseData {
   id: string | undefined;
+  workout_id: string | undefined;
 }
