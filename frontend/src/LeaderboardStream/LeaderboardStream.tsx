@@ -23,6 +23,7 @@ import {
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { useGlobalContext } from "../context/GlobalProvider";
 import { Navigate } from "react-router-dom";
+import { useGetAllUsers } from "../lib/supabase";
 
 interface LeaderboardProps {
   leaderboardData: {
@@ -43,7 +44,6 @@ interface Challenge {
 }
 
 const LeaderboardStream: React.FC<LeaderboardProps> = ({ leaderboardData = [] }) => {
-  const { isLoggedIn } = useGlobalContext();
 
   const [filter, setFilter] = useState<'day' | 'week' | 'month'>('day');
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -56,6 +56,10 @@ const LeaderboardStream: React.FC<LeaderboardProps> = ({ leaderboardData = [] })
     { id: 2, name: "Daily Streak", description: "Exercise every day for a week.", completed: false },
     { id: 3, name: "10K Steps Challenge", description: "Achieve 10,000 steps in a day.", completed: false },
   ]);
+
+
+  const { user } = useGlobalContext();
+  const { data: allUsers } = useGetAllUsers();
 
   useEffect(() => {
     const today = new Date();
@@ -131,122 +135,118 @@ const LeaderboardStream: React.FC<LeaderboardProps> = ({ leaderboardData = [] })
     );
   };
 
-  if(!isLoggedIn)
-    return <Navigate to='/' />
-  else {
-    return (
-      <div className="LeaderboardContainer">
-        <Tabs value={tabValue} onChange={handleTabChange} centered>
-          <Tab label="Leaderboard" value="leaderboard" />
-          <Tab label="Challenges" value="challenges" />
-        </Tabs>
-        {tabValue === 'leaderboard' && (
-          <div>
-            <div className="Title">
-              <h1>Leaderboard</h1>
-              <IconButton onClick={handleMenuClick}>
-                <MoreVertIcon />
-              </IconButton>
-              <Dialog open={dialogOpen} onClose={handleDialogClose} fullWidth maxWidth="sm">
-                <DialogTitle>Filters</DialogTitle>
-                <DialogContent>
-                  <FormControl component="fieldset" style={{ marginBottom: '1rem' }}>
-                    <FormLabel component="legend">Display Option</FormLabel>
+  return (
+    <div className="LeaderboardContainer">
+      <Tabs value={tabValue} onChange={handleTabChange} centered>
+        <Tab label="Leaderboard" value="leaderboard" />
+        <Tab label="Challenges" value="challenges" />
+      </Tabs>
+      {tabValue === 'leaderboard' && (
+        <div>
+          <div className="Title">
+            <h1>Leaderboard</h1>
+            <IconButton onClick={handleMenuClick}>
+              <MoreVertIcon />
+            </IconButton>
+            <Dialog open={dialogOpen} onClose={handleDialogClose} fullWidth maxWidth="sm">
+              <DialogTitle>Filters</DialogTitle>
+              <DialogContent>
+                <FormControl component="fieldset" style={{ marginBottom: '1rem' }}>
+                  <FormLabel component="legend">Display Option</FormLabel>
+                  <RadioGroup
+                    name="displayOption"
+                    value={displayOption}
+                    onChange={handleDisplayOptionChange}
+                  >
+                    <FormControlLabel value="Calories" control={<Radio />} label="Calories Burned" />
+                    <FormControlLabel value="Weights" control={<Radio />} label="Weights Lifted" />
+                  </RadioGroup>
+                </FormControl>
+                <FormControl component="fieldset" style={{ marginBottom: '1rem' }}>
+                  <FormLabel component="legend">Time Filter</FormLabel>
+                  <RadioGroup
+                    name="timeFilter"
+                    value={filter}
+                    onChange={(e) => handleFilterChange(e.target.value as 'day' | 'week' | 'month')}
+                  >
+                    <FormControlLabel value="day" control={<Radio />} label="Day" />
+                    <FormControlLabel value="week" control={<Radio />} label="Week" />
+                    <FormControlLabel value="month" control={<Radio />} label="Month" />
+                  </RadioGroup>
+                </FormControl>
+                {displayOption === 'Weights' && (
+                  <FormControl component="fieldset">
+                    <FormLabel component="legend">Lift Type</FormLabel>
                     <RadioGroup
-                      name="displayOption"
-                      value={displayOption}
-                      onChange={handleDisplayOptionChange}
+                      name="liftFilter"
+                      value={liftFilter}
+                      onChange={(e) => handleLiftFilterChange(e.target.value as 'Squat' | 'Deadlift' | 'Bench' | 'All')}
                     >
-                      <FormControlLabel value="Calories" control={<Radio />} label="Calories Burned" />
-                      <FormControlLabel value="Weights" control={<Radio />} label="Weights Lifted" />
+                      <FormControlLabel value="Squat" control={<Radio />} label="Squat" />
+                      <FormControlLabel value="Deadlift" control={<Radio />} label="Deadlift" />
+                      <FormControlLabel value="Bench" control={<Radio />} label="Bench" />
+                      <FormControlLabel value="All" control={<Radio />} label="All Lifts" />
                     </RadioGroup>
                   </FormControl>
-                  <FormControl component="fieldset" style={{ marginBottom: '1rem' }}>
-                    <FormLabel component="legend">Time Filter</FormLabel>
-                    <RadioGroup
-                      name="timeFilter"
-                      value={filter}
-                      onChange={(e) => handleFilterChange(e.target.value as 'day' | 'week' | 'month')}
-                    >
-                      <FormControlLabel value="day" control={<Radio />} label="Day" />
-                      <FormControlLabel value="week" control={<Radio />} label="Week" />
-                      <FormControlLabel value="month" control={<Radio />} label="Month" />
-                    </RadioGroup>
-                  </FormControl>
-                  {displayOption === 'Weights' && (
-                    <FormControl component="fieldset">
-                      <FormLabel component="legend">Lift Type</FormLabel>
-                      <RadioGroup
-                        name="liftFilter"
-                        value={liftFilter}
-                        onChange={(e) => handleLiftFilterChange(e.target.value as 'Squat' | 'Deadlift' | 'Bench' | 'All')}
-                      >
-                        <FormControlLabel value="Squat" control={<Radio />} label="Squat" />
-                        <FormControlLabel value="Deadlift" control={<Radio />} label="Deadlift" />
-                        <FormControlLabel value="Bench" control={<Radio />} label="Bench" />
-                        <FormControlLabel value="All" control={<Radio />} label="All Lifts" />
-                      </RadioGroup>
-                    </FormControl>
-                  )}
-                  <Button onClick={handleDialogClose} variant="contained" color="primary" style={{ marginTop: '1rem' }}>
-                    Apply Filters
-                  </Button>
-                </DialogContent>
-              </Dialog>
-            </div>
-            <div className="Scores">
-              <Grid container spacing={2} className="LeaderboardGrid">
-                {filteredLeaderboardData.sort((a, b) => b.score - a.score).map((entry, index) => (
-                  <Grid item xs={12} key={entry.id} className="LeaderboardItem">
-                    <Box display="flex" alignItems="center" p={2} bgcolor="#2d2d2d" borderRadius={2} boxShadow={2}>
-                      <Typography variant="h5" component="div" style={{ width: '3rem', color: '#ffeb3b', fontWeight: 'bold' }}>
-                        {index + 1}
-                      </Typography>
-                      <Avatar style={{ marginRight: '1rem' }}>P</Avatar> {/* Placeholder avatar, replace 'P' with user profile pic */}
-                      <Box flexGrow={1}>
-                        <Typography variant="h6" style={{ color: '#f0f0f0' }}>{entry.name}</Typography>
-                        <LinearProgress
-                          variant="determinate"
-                          value={Math.min((entry.score / 100) * 100, 100)}
-                          color="primary"
-                          style={{ marginTop: '0.5rem' }}
-                        />
-                      </Box>
-                      <Typography variant="h6" style={{ color: '#ffeb3b', fontWeight: 'bold', marginLeft: '1rem' }}>
-                        {displayOption === 'Calories' ? `${entry.caloriesBurned} kcal` : `${entry.score} lbs`}
-                      </Typography>
+                )}
+                <Button onClick={handleDialogClose} variant="contained" color="primary" style={{ marginTop: '1rem' }}>
+                  Apply Filters
+                </Button>
+              </DialogContent>
+            </Dialog>
+          </div>
+          <div className="Scores">
+            <Grid container spacing={2} className="LeaderboardGrid">
+              {filteredLeaderboardData.sort((a, b) => b.score - a.score).map((entry, index) => (
+                <Grid item xs={12} key={entry.id} className="LeaderboardItem">
+                  <Box display="flex" alignItems="center" p={2} bgcolor="#2d2d2d" borderRadius={2} boxShadow={2}>
+                    <Typography variant="h5" component="div" style={{ width: '3rem', color: '#ffeb3b', fontWeight: 'bold' }}>
+                      {index + 1}
+                    </Typography>
+                    <Avatar style={{ marginRight: '1rem' }}>P</Avatar> {/* Placeholder avatar, replace 'P' with user profile pic */}
+                    <Box flexGrow={1}>
+                      <Typography variant="h6" style={{ color: '#f0f0f0' }}>{entry.name}</Typography>
+                      <LinearProgress
+                        variant="determinate"
+                        value={Math.min((entry.score / 100) * 100, 100)}
+                        color="primary"
+                        style={{ marginTop: '0.5rem' }}
+                      />
                     </Box>
-                  </Grid>
-                ))}
-              </Grid>
-            </div>
+                    <Typography variant="h6" style={{ color: '#ffeb3b', fontWeight: 'bold', marginLeft: '1rem' }}>
+                      {displayOption === 'Calories' ? `${entry.caloriesBurned} kcal` : `${entry.score} lbs`}
+                    </Typography>
+                  </Box>
+                </Grid>
+              ))}
+            </Grid>
           </div>
-        )}
-        {tabValue === 'challenges' && (
-          <div className="ChallengesContainer">
-            <Typography variant="h5" gutterBottom>Challenges</Typography>
-            {challenges.map((challenge) => (
-              <Box key={challenge.id} display="flex" alignItems="center" mb={2} p={2} bgcolor="#2d2d2d" borderRadius={2} boxShadow={2}>
-                <Checkbox
-                  checked={challenge.completed}
-                  onChange={() => handleChallengeCompletion(challenge.id)}
-                  style={{ color: '#ffeb3b' }}
-                />
-                <Box>
-                  <Typography variant="subtitle1" component="div" style={{ color: '#f0f0f0' }}>
-                    {challenge.name}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    {challenge.description}
-                  </Typography>
-                </Box>
+        </div>
+      )}
+      {tabValue === 'challenges' && (
+        <div className="ChallengesContainer">
+          <Typography variant="h5" gutterBottom>Challenges</Typography>
+          {challenges.map((challenge) => (
+            <Box key={challenge.id} display="flex" alignItems="center" mb={2} p={2} bgcolor="#2d2d2d" borderRadius={2} boxShadow={2}>
+              <Checkbox
+                checked={challenge.completed}
+                onChange={() => handleChallengeCompletion(challenge.id)}
+                style={{ color: '#ffeb3b' }}
+              />
+              <Box>
+                <Typography variant="subtitle1" component="div" style={{ color: '#f0f0f0' }}>
+                  {challenge.name}
+                </Typography>
+                <Typography variant="body2" color="textSecondary">
+                  {challenge.description}
+                </Typography>
               </Box>
-            ))}
-          </div>
-        )}
-      </div>
-    );
-  }
+            </Box>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default LeaderboardStream;

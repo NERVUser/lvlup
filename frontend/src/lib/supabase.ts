@@ -129,6 +129,22 @@ export const useUpdateUser = () => {
   })
 }
 
+// get all users
+export const useGetAllUsers = () => {
+  return useQuery({
+    queryKey: ['users'],
+    queryFn: async () => {
+      const { error, data } = await supabase
+        .from('profiles')
+        .select('*');
+      
+      if(error)
+        throw new Error(error.message);
+      return data;
+    }
+  })
+}
+
 // get all our weights given a userId
 export const useGetUserWeights = (id: string | undefined) => {
   return useQuery({

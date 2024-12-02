@@ -15,6 +15,7 @@ import PrivateRoutes from './utils/PrivateRoutes';
 import GlobalProvider from './context/GlobalProvider';
 import RecommendationsPage from './Recommendations/Recommendations';
 import LeaderboardStream from './LeaderboardStream/LeaderboardStream';
+import Leaderboard from './Leaderboard/Leaderboard';
 
 // Create a default MUI theme (you can customize this later if needed)
 const theme = createTheme();
@@ -55,6 +56,7 @@ root.render(
               <Route element={<Layout><AccountSetup /></Layout>} path='/AccountSetup' />
               <Route element={<Layout><RecommendationsPage /></Layout>} path='/Recommendations' />
               <Route element={<Layout><LeaderboardStream leaderboardData={[]} /></Layout>} path='/Leaderboard' />
+              {/* <Route element={<Layout><Leaderboard leaderboardData={[]} /></Layout>} path='/LeaderboardStream' /> */}
             </Route>
           </Routes>
         </BrowserRouter>
