@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import './FoodJournal.css';
-import { Button, IconButton, CircularProgress, LinearProgress, Dialog, DialogTitle, DialogContent, DialogActions, TextField, List, ListItem, ListItemText, Typography, Box } from '@mui/material';
+import { Button, Card, CardContent, Typography, Dialog, DialogTitle, DialogContent, DialogActions, TextField, List, CircularProgress, LinearProgress, Box, IconButton } from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { Navigate } from 'react-router-dom';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { DateCalendar } from '@mui/x-date-pickers';
-import { useAddMeal, useGetUserMeals } from '../lib/supabase';
+import { useAddMeal, useGetUserMeals, useDeleteMeal, useEditMeal } from '../lib/supabase';
 import { useGlobalContext } from '../context/GlobalProvider';
 import { format } from 'date-fns';
 import MealComponent from '../components/MealComponent';
-
 
 interface MealProps {
     id: string;
@@ -20,27 +21,22 @@ interface MealProps {
     calories: number; 
     carbs: number; 
     protein: number; 
-    fats: number
+    fats: number;
 }
 
 function FoodJournal() {
-    // constants we have for comparing actual vs goal
     const calorieGoal = 2000;
     const carbsGoal = 300;
     const proteinGoal = 250;
     const fatGoal = 100;
     
-
-    // these are used to show the user their total cals, carbs, protein, and fats
     const [calorieIntake, setCalorieIntake] = useState(0);
     const [totalCarbs, setTotalCarbs] = useState(0);
     const [totalProtein, setTotalProtein] = useState(0);
     const [totalFat, setTotalFat] = useState(0);
-
     const [breakfastItems, setBreakfastItems] = useState<MealProps[]>([]);
     const [lunchItems, setLunchItems] = useState<MealProps[]>([]);
     const [dinnerItems, setDinnerItems] = useState<MealProps[]>([]);
-    
     const [newMealForm, setNewMealForm] = useState({
         currentMeal: 'breakfast',
         foodName: '',
@@ -49,10 +45,11 @@ function FoodJournal() {
         foodCarbs: 0,
         foodProtein: 0,
         foodFat: 0,
-    })
+    });
     const [openDialog, setOpenDialog] = useState(false);
     const [editDialogOpen, setEditDialogOpen] = useState(false);
     const [editIndex, setEditIndex] = useState<number | null>(null);
+    const [selectedMeal, setSelectedMeal] = useState<MealProps | null>(null);
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     const [loading, setLoading] = useState(false);
     const [calendarDialogOpen, setCalendarDialogOpen] = useState(false);
@@ -65,8 +62,9 @@ function FoodJournal() {
     const { user } = useGlobalContext();
     const { data: userMeals } = useGetUserMeals(user?.id);
     const { mutate: addMeal } = useAddMeal();
+    const { mutate: deleteMeal } = useDeleteMeal();
+    const { mutate: editMeal } = useEditMeal();
 
-    // this hook is called whenever our date selected or our meals change
     useEffect(() => {
         const formattedDate = format(selectedDate, 'yyyy-MM-dd');
         if (userMeals) {
@@ -78,8 +76,6 @@ function FoodJournal() {
             let totalProtein = 0;
             let totalFat = 0;
 
-            // go through user meals, sort by breakfast, lunch, and dinner
-            // then add up our total calories, carbs, proteins, and fats
             userMeals
                 .filter((meal) => meal.created_at === formattedDate)
                 .forEach((meal) => {
@@ -90,15 +86,12 @@ function FoodJournal() {
                 } else if (meal.meal_type === 'dinner') {
                   dinner.push(meal);
                 }
-          
-                // Accumulate nutrient values
                 totalCalories += meal.calories || 0;
                 totalCarbs += meal.carbs || 0;
                 totalProtein += meal.protein || 0;
                 totalFat += meal.fats || 0;
             });
 
-            // Batch update state
             setBreakfastItems(breakfast);
             setLunchItems(lunch);
             setDinnerItems(dinner);
@@ -106,44 +99,8 @@ function FoodJournal() {
             setTotalCarbs(totalCarbs);
             setTotalProtein(totalProtein);
             setTotalFat(totalFat);
-            // fetchFoodData(selectedDate);
         }
     }, [selectedDate, userMeals]);
-
-    const fetchFoodData = async (date: Date) => {
-        setLoading(true);
-        const dateKey = date.toISOString().split('T')[0];
-        try {
-            // const response = await axios.get(`/api/foodJournal/${dateKey}`);
-            // if (response.data) {
-            //     setBreakfastItems(response.data.breakfastItems);
-            //     setLunchItems(response.data.lunchItems);
-            //     setDinnerItems(response.data.dinnerItems);
-            //     setCalorieIntake(response.data.calorieIntake);
-            //     setCarbs(response.data.carbs);
-            //     setProtein(response.data.protein);
-            //     setFat(response.data.fat);
-            // } else {
-            //     resetFoodData();
-            // }
-        } catch (error) {
-            console.error("Error fetching food data:", error);
-            resetFoodData();
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // resets all food data
-    const resetFoodData = () => {
-        setBreakfastItems([]);
-        setLunchItems([]);
-        setDinnerItems([]);
-        setCalorieIntake(0);
-        setTotalCarbs(0);
-        setTotalProtein(0);
-        setTotalFat(0);
-    };
 
     const handleAddFood = (meal: 'breakfast' | 'lunch' | 'dinner') => {
         setNewMealForm({...newMealForm, currentMeal: meal});
@@ -160,20 +117,18 @@ function FoodJournal() {
             foodCarbs: 0,
             foodProtein: 0,
             foodFat: 0,
-        })
+        });
     };
 
     const handleSaveFood = async () => {
         if (newMealForm.foodName === '' || newMealForm.foodQuantity === '')
             return alert("Please fill in all fields");
 
-        // idk what this does
         setCalorieIntake(calorieIntake + (newMealForm.foodCalories || 0));
         setTotalCarbs(totalCarbs + (newMealForm.foodCarbs || 0));
         setTotalProtein(totalProtein + (newMealForm.foodProtein || 0));
         setTotalFat(totalFat + (newMealForm.foodFat || 0));
 
-        // use supabase to add our meal in backend
         addMeal({
             name: newMealForm.foodName,
             calories: newMealForm.foodCalories,
@@ -183,40 +138,23 @@ function FoodJournal() {
             quantity: newMealForm.foodQuantity,
             meal_type: newMealForm.currentMeal,
             user_id: user?.id,
-        })
+        });
 
         handleCloseDialog();
     };
 
-    const handleSaveEditFood = async () => {
-        if (editIndex !== null) {
-            // const updatedItems = currentMeal === 'breakfast' ? [...breakfastItems] : currentMeal === 'lunch' ? [...lunchItems] : [...dinnerItems];
-            // const oldItem = updatedItems[editIndex];
-            // updatedItems[editIndex] = {
-            //     name: foodName,
-            //     quantity: foodQuantity,
-            //     calories: foodCalories || 0,
-            //     carbs: foodCarbs || 0,
-            //     protein: foodProtein || 0,
-            //     fat: foodFat || 0,
-            // };
-            // if (currentMeal === 'breakfast') {
-            //     setBreakfastItems(updatedItems);
-            // } else if (currentMeal === 'lunch') {
-            //     setLunchItems(updatedItems);
-            // } else if (currentMeal === 'dinner') {
-            //     setDinnerItems(updatedItems);
-            // }
-            // Update totals
-            // setCalorieIntake(calorieIntake - oldItem.calories + (foodCalories || 0));
-            // setCarbs(carbs - oldItem.carbs + (foodCarbs || 0));
-            // setProtein(protein - oldItem.protein + (foodProtein || 0));
-            // setFat(fat - oldItem.fat + (foodFat || 0));
+    const handleEditMeal = (meal: MealProps) => {
+        setSelectedMeal(meal);
+        setEditDialogOpen(true);
+    };
 
-            // handle editing our meal item in backedn
+    const handleDeleteMeal = (mealId: string) => {
+        deleteMeal({ id: mealId });
+    };
 
-            // reset our fields
-
+    const handleSaveEditMeal = () => {
+        if (selectedMeal) {
+            editMeal(selectedMeal);
             setEditDialogOpen(false);
         }
     };
@@ -230,7 +168,7 @@ function FoodJournal() {
     };
 
     return (
-        <div className="food-journal-container">
+        <div className="food-journal-container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <h1 className="header" style={{ textAlign: 'center' }}>
                 <Box sx={{ justifyContent: 'center', alignItems: 'center' }}>
                     <Typography sx={{ marginBottom: '10px' }} variant='h4'>Meals on {format(selectedDate, 'MMM d, yyyy')}</Typography>
@@ -280,7 +218,7 @@ function FoodJournal() {
                         value={Math.min(carbsPercentage, 100)}
                         color={totalCarbs >= carbsGoal ? "success" : "primary"}
                     />
-                    <p style={{ color: totalCarbs >= carbsGoal ? '#4caf50' : '#1976d2' }}>{totalCarbs}g</p>
+                    <p style={{ color: totalCarbs >= carbsGoal ? '#4caf50' : '#1976d2', marginBottom: '10px' }}>{totalCarbs}g</p>
 
                     <p style={{ color: '#ccc' }}>Protein</p>
                     <LinearProgress
@@ -288,7 +226,7 @@ function FoodJournal() {
                         value={Math.min(proteinPercentage, 100)}
                         color={totalProtein >= proteinGoal ? "success" : "primary"}
                     />
-                    <p style={{ color: totalProtein >= proteinGoal ? '#4caf50' : '#1976d2' }}>{totalProtein}g</p>
+                    <p style={{ color: totalProtein >= proteinGoal ? '#4caf50' : '#1976d2', marginBottom: '10px' }}>{totalProtein}g</p>
 
                     <p style={{ color: '#ccc' }}>Fat</p>
                     <LinearProgress
@@ -296,26 +234,60 @@ function FoodJournal() {
                         value={Math.min(fatPercentage, 100)}
                         color={totalFat >= fatGoal ? "success" : "primary"}
                     />
-                    <p style={{ color: totalFat >= fatGoal ? '#4caf50' : '#1976d2' }}>{totalFat}g</p>
+                    <p style={{ color: totalFat >= fatGoal ? '#4caf50' : '#1976d2', marginBottom: '10px' }}>{totalFat}g</p>
                 </div>
             </div>
 
             {/* Meal Sections */}
             {['breakfast', 'lunch', 'dinner'].map((meal) => (
-                <div key={meal} className="meal-section">
-                    <h2>{meal.charAt(0).toUpperCase() + meal.slice(1)}</h2>
-                    <List>
-                        {(meal === 'breakfast' ? breakfastItems : meal === 'lunch' ? lunchItems : dinnerItems).map((item, index) => (
-                            <MealComponent 
-                                index={index} 
-                                meal={item} 
-                            />
-                        ))}
-                    </List>
-                    <Button startIcon={<AddCircleOutlineIcon />} variant="contained" className="add-food-button" onClick={() => handleAddFood(meal as 'breakfast' | 'lunch' | 'dinner')}>
-                        Add Food
-                    </Button>
-                </div>
+                <Card key={meal} className="meal-section" sx={{ marginBottom: '20px', padding: '10px', width: '80%' }}>
+                    <CardContent>
+                        <Typography variant="h6" style={{ textAlign: 'center', marginBottom: '15px' }}>
+                            {meal.charAt(0).toUpperCase() + meal.slice(1)}
+                        </Typography>
+                        <List>
+                            {(meal === 'breakfast' ? breakfastItems : meal === 'lunch' ? lunchItems : dinnerItems).map((item) => (
+                                <Card key={item.id} sx={{ marginBottom: '10px', textAlign: 'left', padding: '15px' }}>
+                                    <CardContent>
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap' }}>
+                                            <Typography variant="body1" fontWeight="bold" sx={{ marginBottom: '5px' }}>
+                                                {item.name}
+                                            </Typography>
+                                            <Typography variant="body2" sx={{ marginBottom: '5px' }}>
+                                                {item.quantity}
+                                            </Typography>
+                                        </Box>
+                                        <Box sx={{ display: 'flex', justifyContent: 'space-around', marginTop: '10px', flexWrap: 'wrap' }}>
+                                            <Typography variant="body2" color="text.secondary" sx={{ marginRight: '10px' }}>
+                                                Calories: {item.calories} Cals
+                                            </Typography>
+                                            <Typography variant="body2" color="text.secondary" sx={{ marginRight: '10px' }}>
+                                                Carbs: {item.carbs}g
+                                            </Typography>
+                                            <Typography variant="body2" color="text.secondary" sx={{ marginRight: '10px' }}>
+                                                Protein: {item.protein}g
+                                            </Typography>
+                                            <Typography variant="body2" color="text.secondary">
+                                                Fat: {item.fats}g
+                                            </Typography>
+                                        </Box>
+                                        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '10px', gap: '10px' }}>
+                                            <IconButton onClick={() => handleEditMeal(item)} sx={{ color: 'grey.500' }}>
+                                                <EditIcon />
+                                            </IconButton>
+                                            <IconButton onClick={() => handleDeleteMeal(item.id)} sx={{ color: 'grey.500' }}>
+                                                <DeleteIcon />
+                                            </IconButton>
+                                        </Box>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </List>
+                        <Button startIcon={<AddCircleOutlineIcon />} variant="contained" className="add-food-button" onClick={() => handleAddFood(meal as 'breakfast' | 'lunch' | 'dinner')} fullWidth>
+                            Add Food
+                        </Button>
+                    </CardContent>
+                </Card>
             ))}
     
             {/* Add Food Dialog */}
@@ -374,7 +346,68 @@ function FoodJournal() {
                     <Button onClick={handleCloseDialog} color="secondary">
                         Cancel
                     </Button>
-                    <Button onClick={handleSaveFood} color={newMealForm.foodCalories >= 2000 ? "success" : "primary"} variant="contained">
+                    <Button onClick={handleSaveFood} color="primary" variant="contained">
+                        Save
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Edit Meal Dialog */}
+            <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)}>
+                <DialogTitle>Edit Food Item</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        label="Food Name"
+                        fullWidth
+                        margin="dense"
+                        value={selectedMeal?.name || ''}
+                        onChange={(e) => setSelectedMeal((prev) => prev ? {...prev, name: e.target.value} : null)}
+                    />
+                    <TextField
+                        label="Quantity (e.g., 100g, 1 cup)"
+                        fullWidth
+                        margin="dense"
+                        value={selectedMeal?.quantity || ''}
+                        onChange={(e) => setSelectedMeal((prev) => prev ? {...prev, quantity: e.target.value} : null)}
+                    />
+                    <TextField
+                        label="Calories"
+                        type="number"
+                        fullWidth
+                        margin="dense"
+                        value={selectedMeal?.calories || ''}
+                        onChange={(e) => setSelectedMeal((prev) => prev ? {...prev, calories: Number(e.target.value)} : null)}
+                    />
+                    <TextField
+                        label="Carbs (g)"
+                        type="number"
+                        fullWidth
+                        margin="dense"
+                        value={selectedMeal?.carbs || ''}
+                        onChange={(e) => setSelectedMeal((prev) => prev ? {...prev, carbs: Number(e.target.value)} : null)}
+                    />
+                    <TextField
+                        label="Protein (g)"
+                        type="number"
+                        fullWidth
+                        margin="dense"
+                        value={selectedMeal?.protein || ''}
+                        onChange={(e) => setSelectedMeal((prev) => prev ? {...prev, protein: Number(e.target.value)} : null)}
+                    />
+                    <TextField
+                        label="Fats (g)"
+                        type="number"
+                        fullWidth
+                        margin="dense"
+                        value={selectedMeal?.fats || ''}
+                        onChange={(e) => setSelectedMeal((prev) => prev ? {...prev, fats: Number(e.target.value)} : null)}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setEditDialogOpen(false)} color="secondary">
+                        Cancel
+                    </Button>
+                    <Button onClick={handleSaveEditMeal} color="primary" variant="contained">
                         Save
                     </Button>
                 </DialogActions>
