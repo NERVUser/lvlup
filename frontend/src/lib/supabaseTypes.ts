@@ -50,3 +50,29 @@ export interface DeleteExerciseData {
   id: string | undefined;
   workout_id: string | undefined;
 }
+
+//used for addings meals
+export interface AddMealData {
+  name: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fats: number;
+  quantity: string;
+  meal_type: string;
+  user_id: string | undefined;
+}
+
+export interface DeleteMealData {
+  id: string;
+}
+
+export interface EditMealData {
+  id: string;
+  name: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fats: number;
+  quantity: string;
+}
