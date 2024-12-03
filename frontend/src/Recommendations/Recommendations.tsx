@@ -15,6 +15,9 @@ import {
   DialogContent,
   TextField,
   DialogActions,
+  Snackbar,
+  Tab,
+  Tabs,
 } from '@mui/material';
 import ReccomendedExercise from '../components/ReccomendedExercise';
 import ExerciseDialog from '../components/ExerciseDialog';
@@ -44,121 +47,64 @@ const RecommendationsPage = () => {
   const [selectedMuscle, setSelectedMuscle] = useState<string | null>(null);
   const [recommendations, setRecommendations] = useState<FetchedExercises[] | null>([]);
   const [selectedExercises, setSelectedExercises] = useState<string[]>([]);
+  const [workoutName, setWorkoutName] = useState('');
+  const [exercisesToAdd, setExercisesToAdd] = useState<UploadExerciseProp[]>([]);
+  const [tabIndex, setTabIndex] = useState(0);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const { user } = useGlobalContext();
 
-  //mutation to add workout to backend
   const { mutateAsync: addWorkout } = useAddWorkout();
   const { mutate: addExercise } = useAddExercise();
 
-  // these are used to actually upload a workout and its exercises
-  const [workoutName, setWorkoutName] = useState('');
-  const [exercisesToAdd, setExercisesToAdd] = useState<UploadExerciseProp[]>([]);
-
-  // these get displayed as buttons on our page
-  const muscleGroupLabels: string[] = ['Push', 'Pull', 'Legs']
-  const muscleGroups: string[] = [
-    'Chest',
-    'Back',
-    'Quadriceps',
-    'Shoulders',
-    'Biceps',
-    'Hamstrings',
-    'Triceps',
-    'Abdominals',
-    'Calves',
+  const muscleGroupLabels: string[] = ['Push', 'Pull', 'Legs'];
+  const muscleGroups: string[][] = [
+    ['Chest', 'Shoulders', 'Triceps'],
+    ['Back', 'Biceps'],
+    ['Quadriceps', 'Hamstrings', 'Calves']
   ];
 
-  // hook called everytime our dialog is open
   useEffect(() => {
-    if(dialogOpen) {
-      const updatedExercisesToAdd: UploadExerciseProp[] = [];
-
-      selectedExercises.forEach(exercise => {
-        const newExercise = {
-          name: exercise,
-          duration: 0,
-          calories_burned: 0,
-          sets: 0,
-          reps: 0,
-          weight: 0,
-        }
-
-        updatedExercisesToAdd.push(newExercise);
-      })
-
+    if (dialogOpen) {
+      const updatedExercisesToAdd: UploadExerciseProp[] = selectedExercises.map((exercise) => ({
+        name: exercise,
+        duration: 0,
+        calories_burned: 0,
+        sets: 0,
+        reps: 0,
+        weight: 0,
+      }));
       setExercisesToAdd(updatedExercisesToAdd);
     }
   }, [dialogOpen]);
 
-  // hits our api to find all exercises belonging to a particular muscle group
   const handleGetRecommendations = async () => {
-
     setIsLoading(true);
     const apiKey = 'NxUluHVadxEpPioUZ9fAOA==tUBsDWBDZoHNLsbh';
-    
-    // for back, grab exercises for lats, lower_back, and middle_back
     try {
-      if(selectedMuscle === 'Back'){
-        const backMuscles = ['lats', 'lower_back', 'middle_back'];
-        const result = [];
-
-        for(const muscle of backMuscles) {
-          const response = await fetch(
-            `https://api.api-ninjas.com/v1/exercises?muscle=${muscle}`,
-            {
-              method: 'GET',
-              headers: {
-                'X-Api-Key': apiKey,
-              },
-            }
-          );
-          
-          const data = await response.json();
-          console.log('Muscle: ', muscle, ' Response: ', data);
-          
-          result.push(...data);
-        }
-
-        setRecommendations(result);
-
-      } else {
+      const muscle = selectedMuscle;
+      if (muscle) {
         const response = await fetch(
-          `https://api.api-ninjas.com/v1/exercises?muscle=${selectedMuscle}`,
-          {
-            method: 'GET',
-            headers: {
-              'X-Api-Key': apiKey,
-            },
-          }
+          `https://api.api-ninjas.com/v1/exercises?muscle=${muscle.toLowerCase()}`,
+          { method: 'GET', headers: { 'X-Api-Key': apiKey } }
         );
-
-        if(!response?.ok)
-          return console.log('Error:', response?.status, await response?.text());
-        
         const data = await response.json();
         setRecommendations(data);
       }
     } catch (error) {
-      console.log("Error", error)
+      console.log('Error', error);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleSaveWorkout = async () => {
-    if(!workoutName || !exercisesToAdd)
-      return alert("Please fill in all fields");
-
-    // no matter what, we will make 1 workout
+    if (!workoutName || !exercisesToAdd.length) return alert('Please fill in all fields');
     const newWorkout = await addWorkout({
-      workoutName: workoutName,
+      workoutName,
       user_id: user?.id,
-      id: undefined
-    })
-
-    //add our exercises, which comprise of one workout
-    //use the workout id from above when adding our exercises
-    exercisesToAdd.map(exercise => {
+      id: undefined,
+    });
+    exercisesToAdd.forEach((exercise) => {
       addExercise({
         workout_id: newWorkout.id,
         user_id: user?.id,
@@ -168,122 +114,157 @@ const RecommendationsPage = () => {
         exerciseSets: exercise.sets,
         exerciseReps: exercise.reps,
         exerciseWeight: exercise.weight,
-      })
-    })
-
-    // now reset our fields
+      });
+    });
     setExercisesToAdd([]);
     setRecommendations([]);
     setDialogOpen(false);
+    setSuccessMessage('Workout saved successfully!');
+  };
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setTabIndex(newValue);
+    setSelectedMuscle(null);
   };
 
   return (
-    <Container className="recommendations-container">
-      <Typography variant="h4" className="title" gutterBottom>Recommendations</Typography>
-      <Box sx={{ display: 'flex', justifyContent: 'space-around', marginInline: '20px', marginBottom: '20px' }}>
-        {muscleGroupLabels.map((label) => (
-          <Typography variant='h4' sx={{ textDecorationLine: 'underline' }}>{label}</Typography>
+    <Container maxWidth="lg" sx={{ padding: '20px', backgroundColor: '#333', borderRadius: '10px', color: '#fff' }}>
+      <Typography variant="h4" align="center" gutterBottom sx={{ fontWeight: 'bold', color: '#fff' }}>
+        Workout Recommendations
+      </Typography>
+      <Tabs value={tabIndex} onChange={handleTabChange} centered sx={{ marginBottom: 3 }}>
+        {muscleGroupLabels.map((label, index) => (
+          <Tab key={index} label={label} sx={{ color: '#fff' }} />
         ))}
-      </Box>
+      </Tabs>
       <Box display="flex" flexWrap="wrap" justifyContent="center" gap={3}>
-        {muscleGroups.map((group) => (
-          <Box key={group} width={{ xs: '100%', sm: '45%', md: '30%' }}>
-            <Card sx={{ backgroundColor: selectedMuscle === group ? 'lightgray' : 'white', border: selectedMuscle === group ? 'solid 2px yellow' : '' }}>
-              <CardActionArea onClick={() => setSelectedMuscle(group)}>
-                <CardContent>
-                  <Typography variant="h5" align="center">{group}</Typography>
-                </CardContent>
-              </CardActionArea>
-            </Card>
-          </Box>
+        {muscleGroups[tabIndex].map((group) => (
+          <Card
+            key={group}
+            sx={{
+              width: '220px',
+              backgroundColor: selectedMuscle === group ? '#FFA726' : '#444',
+              border: selectedMuscle === group ? 'solid 2px #FF9800' : 'solid 1px #666',
+              borderRadius: '10px',
+              transition: 'transform 0.3s ease-in-out',
+              '&:hover': {
+                transform: 'scale(1.05)',
+                boxShadow: '0 6px 20px rgba(0, 0, 0, 0.3)',
+              },
+            }}
+          >
+            <CardActionArea onClick={() => setSelectedMuscle(group)}>
+              <CardContent>
+                <Typography variant="h6" align="center" sx={{ fontWeight: 'bold', color: '#fff' }}>
+                  {group}
+                </Typography>
+              </CardContent>
+            </CardActionArea>
+          </Card>
         ))}
       </Box>
-      <Box sx={{ display: 'flex', marginBottom: 2, marginTop: 2, gap: 2 }}>
-        <Box sx={{ width: '220px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          {isLoading ? (
-            <CircularProgress />
-          ) : (
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleGetRecommendations}
-              className="get-recommendations-button"
-              sx={{ paddingTop: '15px', paddingBottom: '15px' }}
-            >
-              Get Recommendations
-            </Button>
-          )}
-        </Box>
+      <Box sx={{ display: 'flex', marginY: 3, gap: 2, justifyContent: 'center' }}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleGetRecommendations}
+          disabled={isLoading}
+          sx={{
+            minWidth: '200px',
+            paddingY: '15px',
+            fontWeight: 'bold',
+          }}
+        >
+          {isLoading ? <CircularProgress size={24} /> : 'Get Recommendations'}
+        </Button>
         <Button
           variant="contained"
           color="primary"
           onClick={() => setDialogOpen(true)}
-          className="get-recommendations-button"
-          sx={{ paddingTop: '15px', paddingBottom: '15px' }}
+          sx={{
+            minWidth: '200px',
+            paddingY: '15px',
+            fontWeight: 'bold',
+          }}
         >
-          Add Workout
+          Confirm Workout
         </Button>
       </Box>
 
-      {/* Display all fetched reccomended exercises based on the muscle group */}
-      <Box sx={{ display: 'flex', gap: 2, justifyContent: 'space-around' }}>
-        <List>
+      <Box sx={{ display: 'flex', gap: 3, justifyContent: 'center', marginTop: 4 }}>
+        <List sx={{ maxWidth: '400px', bgcolor: '#333', borderRadius: '10px', boxShadow: '0 4px 15px rgba(0, 0, 0, 0.5)', color: '#ddd' }}>
           {recommendations?.map((rec, index) => (
-            <ReccomendedExercise key={index} selectedExercises={selectedExercises} setSelectedExercises={setSelectedExercises} exercise={rec}/>
+            <ReccomendedExercise
+              key={index}
+              selectedExercises={selectedExercises}
+              setSelectedExercises={setSelectedExercises}
+              exercise={rec}
+            />
           ))}
         </List>
-        <Box>
-          <Typography variant='h4' color='white'>Your Selcted Exercises</Typography>
+        <Box sx={{ maxWidth: '400px', bgcolor: '#333', borderRadius: '10px', padding: 2, boxShadow: 1, color: '#fff' }}>
+          <Typography variant="h5" align="center" sx={{ marginBottom: 2 }}>
+            Your Selected Exercises
+          </Typography>
           <List>
             {selectedExercises?.map((exercise, index) => (
               <ListItem
-              key={index}
-              sx={{ 
-                backgroundColor: 'white', 
-                border: 'solid 2px black', 
-                borderRadius: '10px', 
-                marginBottm: '10px', 
-                display: 'flex',
-                justifyContent: 'space-between',
-                marginBottom: '10px',
-                padding: '15px'
-              }}
-            >
-              <Typography variant='h5' color='black'>{exercise}</Typography>
-            </ListItem>
+                key={index}
+                sx={{
+                  backgroundColor: '#555',
+                  border: 'solid 1px #666',
+                  borderRadius: '10px',
+                  marginBottom: '10px',
+                  padding: '10px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <Typography variant="body1" sx={{ fontWeight: 'bold', color: '#fff' }}>
+                  {exercise}
+                </Typography>
+              </ListItem>
             ))}
           </List>
         </Box>
       </Box>
 
       <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
-        <DialogContent>
-          <Typography variant='h4' color='black' sx={{ marginBottom: 2 }}>Let's save your workout</Typography>
-          <TextField 
+        <DialogContent sx={{ bgcolor: '#333', color: '#fff' }}>
+          <Typography variant="h5" sx={{ marginBottom: 2, color: '#ddd' }}>
+            Confirm Your Workout
+          </Typography>
+          <TextField
             label="Workout Name"
-            margin='dense'
             value={workoutName}
             onChange={(e) => setWorkoutName(e.target.value)}
             fullWidth
+            margin="dense"
+            sx={{ input: { color: '#fff' }, label: { color: '#ddd' } }}
           />
           <List>
             {exercisesToAdd.map((exercise, index) => (
-              <ExerciseDialog key={index} exercise={exercise} setExercises={setExercisesToAdd}/>
+              <ExerciseDialog key={index} exercise={exercise} setExercises={setExercisesToAdd} />
             ))}
           </List>
         </DialogContent>
-
-        {/* Save or cancel our workout */}
-        <DialogActions>
+        <DialogActions sx={{ bgcolor: '#333' }}>
           <Button onClick={() => setDialogOpen(false)} color="secondary">
             Cancel
           </Button>
           <Button onClick={handleSaveWorkout} color="primary" variant="contained">
-            Save Workout
+            Confirm Workout
           </Button>
         </DialogActions>
-
       </Dialog>
+
+      <Snackbar
+        open={Boolean(successMessage)}
+        autoHideDuration={3000}
+        onClose={() => setSuccessMessage(null)}
+        message={successMessage}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      />
     </Container>
   );
 };
