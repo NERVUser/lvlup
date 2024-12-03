@@ -4,6 +4,7 @@ import { TextField, Button, Typography, Box, CircularProgress } from '@mui/mater
 import { createUser } from '../lib/supabase'
 import { useNavigate } from 'react-router-dom';
 import { useGlobalContext } from '../context/GlobalProvider';
+import logo from '../image_assets/main_logo.png'
 
 function Signup() {
     const [email, setEmail] = useState('');
@@ -44,7 +45,7 @@ function Signup() {
 
     return (
       <Box className="signup-container">
-        <Typography variant="h4" className="logo-text">LVL UP</Typography>
+        <img src={ logo } alt="" id="logo" style={{marginBottom: '15px'}}/>
         <Box className="signup-form">
           <TextField
             label="Email"
@@ -90,7 +91,8 @@ function Signup() {
               </Button>
             )}
           </Box>
-          <div
+        </Box>
+        <div
             className='login-container'
           >
             <p>Aleady Have an Account?</p>
@@ -98,12 +100,11 @@ function Signup() {
               variant='text'
               color='primary'
               className='login-button'
-              onClick={() => navigate('/Login')}
+              onClick={() => navigate('/login')}
             >
               Login
             </Button>
           </div>
-        </Box>
       </Box>
     );
 }

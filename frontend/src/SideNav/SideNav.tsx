@@ -4,12 +4,16 @@ import FastfoodIcon from '@mui/icons-material/Restaurant';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import RecommendIcon from '@mui/icons-material/Recommend';
 import LeaderboardIcon from '@mui/icons-material/Leaderboard';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import React from 'react';
-import { Drawer, IconButton, List, ListItemButton, ListItemIcon, ListItemText, Box } from '@mui/material';
+import { Drawer, IconButton, List, ListItemButton, ListItemIcon, ListItemText, Box, Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import { createTheme, ThemeProvider } from "@mui/material";
+import { logOut } from "../lib/supabase";
+import { useGlobalContext } from "../context/GlobalProvider";
 
 function SideNav() {
+  const { setUser, setIsLoggedIn } = useGlobalContext();
   const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
   const navigate = useNavigate();
 
@@ -61,6 +65,14 @@ function SideNav() {
     navigate(path);
   };
 
+  const handleLogout = async () => {
+    await logOut();
+    //setUser(null);
+    setIsLoggedIn(false);
+
+    navigate('/');
+  }
+
   return (
     <ThemeProvider theme={theme}>
       <Box>
@@ -70,7 +82,7 @@ function SideNav() {
           color="primary"
           aria-label="open drawer"
         >
-          <MenuIcon />
+          <MenuIcon sx={{ fontSize: 30 }}/>
         </IconButton>
 
         {/* Drawer Component */}
@@ -119,6 +131,13 @@ function SideNav() {
                   <LeaderboardIcon sx={{ color: '#ffffff' }} />
                 </ListItemIcon>
                 <ListItemText primary="Leaderboard" />
+              </ListItemButton>
+
+              <ListItemButton onClick={handleLogout}>
+              <ListItemIcon>
+                  <ExitToAppIcon sx={{ color: '#ffffff' }} />
+                </ListItemIcon>
+                <ListItemText primary="Log Out" />
               </ListItemButton>
             </List>
           </Box>

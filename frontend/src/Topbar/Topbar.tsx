@@ -1,25 +1,19 @@
 import './Topbar.css'
 import SideNav from '../SideNav/SideNav'
-import { Link } from 'react-router-dom';
-import { Menu, Close } from '@mui/icons-material';
+import logo from '../image_assets/main_logo.png'
+import * as Icons from '@mui/icons-material'
 import { useState } from 'react';
 
 export default function Topbar () {
-    const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
-    const toggleMenu = () => {
-        setIsMenuOpen(!isMenuOpen);
-    }
+    const [isSidenavOpen, setIsSidenavOpen] = useState<boolean>(false);
+    const toggleSidenav = () => {
+        setIsSidenavOpen(!isSidenavOpen);
+    };
+
     return (
         <div id="topbar">
-            {isMenuOpen ? (
-                <div>
-                    <button onClick={ toggleMenu } id="closeBttn"> <Close /> </button>
-                    <SideNav />
-                </div>
-                
-            ) : (
-                <button onClick={ toggleMenu } id="menuBttn"> <Menu /> </button>
-            )}
+            <SideNav />
+            <img src={ logo } alt="" id="logo" />
         </div>
     );
 }

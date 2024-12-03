@@ -1,15 +1,22 @@
 #topbar {
     margin: 5px;
     display: flex;
+    position: sticky;
     justify-content: space-between;
+    align-items: center;
+    padding: 1.5vh;
+    top: 0;
+    background-color: black;
+    z-index: 1000;
 }
 
-#closeBttn {
-    background-color: grey;
-    border: none;
+#logo {
+    width: 200px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 #menuBttn {
-    background-color: none;
+    background: none;
     border: none;
 }

@@ -53,7 +53,7 @@ root.render(
               <Route element={<Layout><AccountSetup /></Layout>} path='/accountsetup' />
               <Route element={<Layout><RecommendationsPage /></Layout>} path='/recommendations' />
               <Route element={<Layout><AccountPage /></Layout>} path='/accountpage' />
-              <Route element={<Layout><LeaderboardStream leaderboardData={[]} /></Layout>} path='/Leaderboards' />
+              <Route element={<Layout><LeaderboardStream leaderboardData={[]} /></Layout>} path='/leaderboards' />
             </Route>
           </Routes>
         </BrowserRouter>
