@@ -55,7 +55,6 @@ root.render(
               <Route element={<Layout><AccountPage /></Layout>} path='/AccountPage' />
               <Route element={<Layout><RecommendationsPage /></Layout>} path='/Recommendations' />
               <Route element={<Layout><LeaderboardStream leaderboardData={[]} /></Layout>} path='/Leaderboard' />
-              {/* <Route element={<Layout><Leaderboard leaderboardData={[]} /></Layout>} path='/LeaderboardStream' /> */}
             </Route>
           </Routes>
         </BrowserRouter>

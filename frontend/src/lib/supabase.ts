@@ -191,7 +191,7 @@ export const useAddUserWeight = () => {
 // get all workouts for the user
 export const useGetUserWorkouts = (id: string | undefined) => {
   return useQuery({
-    queryKey: ['workouts', id],
+    queryKey: ['workouts'],
     queryFn: async () => {
       const { error, data } = await supabase
         .from('workouts')
@@ -226,7 +226,7 @@ export const useGetUserExercises = (id: string | undefined) => {
 // get all exercises associated with a particular workout
 export const useGetWorkoutExercises = (id: string | undefined) => {
   return useQuery({
-    queryKey: ['exercises', id],
+    queryKey: ['exercises'],
     queryFn: async () => {
       const { error, data } = await supabase
         .from('exercises')

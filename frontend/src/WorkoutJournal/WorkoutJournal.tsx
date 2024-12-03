@@ -268,8 +268,8 @@ const WorkoutJournal = () => {
 
     // this function adds a given exercise locally
     const handleAddExercise = (exercise: ExerciseProp) => {
-      if(!exercise.exerciseName || !exercise.calories_burned || !exercise.duration)
-        return alert("Please fill in all fields");
+      // if(!exercise.exerciseName || !exercise.calories_burned || !exercise.duration)
+      //   return alert("Please fill in all fields");
 
       // add our new exercise
       setNewExercises((prevExercises) => [...prevExercises, exercise]);
@@ -312,8 +312,8 @@ const WorkoutJournal = () => {
 
       //handle a preset workout
       if(toggledWorkoutType){
-        if(!addExerciseForm.exerciseName)
-          return alert("Please fill in exercise name");
+        // if(!addExerciseForm.exerciseName)
+        //   return alert("Please fill in exercise name");
 
         try {
           // now we need to add our exercise, use workout id from above

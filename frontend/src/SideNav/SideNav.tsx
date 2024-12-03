@@ -5,6 +5,7 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import RecommendIcon from '@mui/icons-material/Recommend';
 import LeaderboardIcon from '@mui/icons-material/Leaderboard';
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import DynamicFeedIcon from '@mui/icons-material/DynamicFeed';
 import React from 'react';
 import { Drawer, IconButton, List, ListItemButton, ListItemIcon, ListItemText, Box, Button } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
@@ -112,12 +113,12 @@ function SideNav() {
                 <ListItemText primary="Food" />
               </ListItemButton>
 
-              {/*<ListItemButton onClick={() => handleNavigate('/AccountPage')}>
+              <ListItemButton onClick={() => handleNavigate('/AccountPage')}>
                 <ListItemIcon>
                   <AccountCircleIcon sx={{ color: '#ffffff' }} />
                 </ListItemIcon>
                 <ListItemText primary="Account" />
-              </ListItemButton>*/}
+              </ListItemButton>
 
               <ListItemButton onClick={() => handleNavigate('/Recommendations')}>
                 <ListItemIcon>
@@ -131,6 +132,13 @@ function SideNav() {
                   <LeaderboardIcon sx={{ color: '#ffffff' }} />
                 </ListItemIcon>
                 <ListItemText primary="Leaderboard" />
+              </ListItemButton>
+
+              <ListItemButton onClick={() => handleNavigate('/Feedpage')}>
+                <ListItemIcon>
+                  <DynamicFeedIcon sx={{ color: '#ffffff' }} />
+                </ListItemIcon>
+                <ListItemText primary="Feed" />
               </ListItemButton>
 
               <ListItemButton onClick={handleLogout}>
