@@ -23,7 +23,8 @@ import {
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { useGlobalContext } from "../context/GlobalProvider";
 import { Navigate, useNavigate } from "react-router-dom";
-import { logOut, useGetAllUsers } from "../lib/supabase";
+import { supabase, useGetAllUsers, useGetUserExercises } from "../lib/supabase";
+import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval, parseISO, format, add } from 'date-fns';
 
 interface LeaderboardProps {
   leaderboardData: {
@@ -43,13 +44,43 @@ interface Challenge {
   completed: boolean;
 }
 
-const LeaderboardStream: React.FC<LeaderboardProps> = ({ leaderboardData = [] }) => {
+type ExerciseProp = {
+  created_at: string;
+  name: string;
+  weight: number;
+  reps: number;
+  sets: number;
+  workout_id: string;
+  duration: number;
+  calories_burned: number
+  user_id: string;
+}
 
-  const [filter, setFilter] = useState<'day' | 'week' | 'month'>('day');
+type UserExerciseTotals = {
+  fullName: string;
+  totalCalories: number;
+  totalWeight: number;
+};
+
+type ExercisesByUser = {
+  [userId: string]: UserExerciseTotals;
+};
+
+interface UserExercises {
+  userId: string;
+  fullName: string;
+  totalCalories: number;
+  totalWeight: number;
+}
+
+const LeaderboardStream: React.FC<LeaderboardProps> = () => {
+
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+  const [timeSelection, setTimeSelection] = useState<'today' | 'week' | 'month'>('today');
   const [dialogOpen, setDialogOpen] = useState(false);
   const [liftFilter, setLiftFilter] = useState<'Squat' | 'Deadlift' | 'Bench' | 'All'>('All');
   const [displayOption, setDisplayOption] = useState<'Calories' | 'Weights'>('Calories');
-  const [filteredLeaderboardData, setFilteredLeaderboardData] = useState(leaderboardData);
   const [tabValue, setTabValue] = useState<'leaderboard' | 'challenges'>('leaderboard');
   const [challenges, setChallenges] = useState<Challenge[]>([
     { id: 1, name: "Workweek Hustle", description: "Get the most steps between Monday and Friday.", completed: false },
@@ -59,53 +90,121 @@ const LeaderboardStream: React.FC<LeaderboardProps> = ({ leaderboardData = [] })
 
 
   const { user, setUser, setIsLoggedIn } = useGlobalContext();
-  const { data: allUsers } = useGetAllUsers();
-  const navigate = useNavigate();
+  const { data: allUsers, isLoading: usersLoading } = useGetAllUsers();
+  
+  // this is used to set total weight and calories burned for each user
+  const [userExercises, setUserExercises] = useState<UserExercises[]>([]);
+  const [sortedUsers, setSortedUsers] = useState<UserExercises[] | null>(null);
 
   useEffect(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    if(!usersLoading && allUsers)
+      fetchAllUserExercises();
+  }, [allUsers, usersLoading, timeSelection]);
+
+  // this hook is called each time our display options change, it sorts users based on the display option
+  useEffect(() => {
+    // sort our userExercises by the display option and then display it
+    const tempSortedUsers = [...userExercises].sort((a, b) => 
+      displayOption === 'Calories'
+        ? b.totalCalories - a.totalCalories 
+        : b.totalWeight - a.totalWeight
+    );
+
+    setSortedUsers(tempSortedUsers);
+  }, [userExercises, displayOption, timeSelection])
+
+  // get a user's exercise based on their id
+  const fetchUserExercises = async (id: string) => {
+    const { error, data } = await supabase
+      .from('exercises')
+      .select('*')
+      .eq('user_id', id);
+  
+    if (error) throw new Error(error.message);
+  
+    return data;
+  };
+
+  // Function to get the date range based on the selected time frame
+  const getDateRange = (timeFrame: 'today' | 'week' | 'month') => {
+    let start, end;
+    switch (timeFrame) {
+      case 'week':
+        start = startOfWeek(new Date());
+        end = endOfWeek(new Date());
+        return { start, end }
+      case 'month':
+        start = startOfMonth(new Date());
+        end = endOfMonth(new Date());
+        return { start, end }
+      default:
+        return { start: new Date(), end: new Date() };
+    }
+  };
+
+  // Function to filter exercises by the selected time frame
+  const filterExercisesByTimeframe = (exercises: ExerciseProp[], timeFrame: 'today' | 'week' | 'month') => {
+    return exercises.filter(exercise => {
+      
+      // if selection is today, just return a comparison
+      if(timeFrame === 'today')
+        return exercise.created_at == format(new Date(), 'yyyy-MM-dd');
+
+      // otherwise, we'll get the appropriate range and make our comparison
+      const { start, end } = getDateRange(timeFrame);
+  
+      // parse the created_at date
+      const date = parseISO(exercise.created_at);
+      return isWithinInterval(date, { start, end });
+        
+    });
+  };
+
+  const fetchAllUserExercises = async () => {
+    setIsLoading(true);
     
-    const startOfWeek = new Date(today);
-    startOfWeek.setDate(today.getDate() - today.getDay()); // Week starts on Sunday
-    startOfWeek.setHours(0, 0, 0, 0);
+    if(allUsers){
+      const results = await Promise.all(
+        allUsers.map(async (profile: { id: string, full_name: string, created_at: string }) => {
+          const exercises = await fetchUserExercises(profile.id);
+          // now filter our exercises by our selected time frame
+          const filteredExercises = filterExercisesByTimeframe(exercises, timeSelection);
+          
+          return { userId: profile.id, fullName: profile.full_name, exercises: filteredExercises };
+        })
+      );
 
-    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    startOfMonth.setHours(0, 0, 0, 0);
+      // Transform results into a keyed object for easier access
+      const exercisesByUser = results.reduce<ExercisesByUser>((acc, { userId, fullName, exercises }) => {
+        const totals = exercises.reduce(
+          (sum, exercise: { calories_burned: number; weight: number }) => {
+            sum.totalCalories += exercise.calories_burned;
+            sum.totalWeight += exercise.weight;
+            return sum;
+          },
+          { totalCalories: 0, totalWeight: 0 } // Initial cumulative values
+        );
+      
+        acc[userId] = { ...totals, fullName };  // Include full name here
+        return acc;
+      }, {});
 
-    const updatedLeaderboardData = leaderboardData.filter((entry) => {
-      const entryDate = new Date(entry.date);
-      entryDate.setHours(0, 0, 0, 0);
-      const dateMatches = (() => {
-        switch (filter) {
-          case 'day':
-            return entryDate.getTime() === today.getTime();
-          case 'week':
-            return entryDate >= startOfWeek && entryDate <= today;
-          case 'month':
-            return entryDate >= startOfMonth && entryDate <= today;
-          default:
-            return true;
-        }
-      })();
-      const liftMatches = liftFilter === 'All' || entry.liftType === liftFilter;
-      return dateMatches && liftMatches;
-    }).reduce((acc, entry) => {
-      const existingEntry = acc.find(e => e.name === entry.name);
-      if (existingEntry) {
-        existingEntry.score += entry.score;
-        existingEntry.caloriesBurned += entry.caloriesBurned;
-      } else {
-        acc.push({ ...entry });
-      }
-      return acc;
-    }, [] as typeof leaderboardData);
+      // convert our exercises by User object into an array
+      const userExercisesArray = Object.entries(exercisesByUser).map(([userId, { fullName, totalCalories, totalWeight }]) => ({
+        userId,
+        fullName,
+        totalCalories,
+        totalWeight,
+      }));
+  
+      setUserExercises(userExercisesArray);
+    }
 
-    setFilteredLeaderboardData(updatedLeaderboardData);
-  }, [filter, liftFilter, leaderboardData]);
+    setIsLoading(false);
+  };
 
-  const handleFilterChange = (newFilter: 'day' | 'week' | 'month') => {
-    setFilter(newFilter);
+  const handleFilterChange = (newFilter: 'today' | 'week' | 'month') => {
+    setTimeSelection(newFilter);
   };
 
   const handleMenuClick = () => {
@@ -114,10 +213,6 @@ const LeaderboardStream: React.FC<LeaderboardProps> = ({ leaderboardData = [] })
 
   const handleDialogClose = () => {
     setDialogOpen(false);
-  };
-
-  const handleLiftFilterChange = (lift: 'Squat' | 'Deadlift' | 'Bench' | 'All') => {
-    setLiftFilter(lift);
   };
 
   const handleDisplayOptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -167,29 +262,14 @@ const LeaderboardStream: React.FC<LeaderboardProps> = ({ leaderboardData = [] })
                   <FormLabel component="legend">Time Filter</FormLabel>
                   <RadioGroup
                     name="timeFilter"
-                    value={filter}
-                    onChange={(e) => handleFilterChange(e.target.value as 'day' | 'week' | 'month')}
+                    value={timeSelection}
+                    onChange={(e) => handleFilterChange(e.target.value as 'today' | 'week' | 'month')}
                   >
-                    <FormControlLabel value="day" control={<Radio />} label="Day" />
+                    <FormControlLabel value="today" control={<Radio />} label="Today" />
                     <FormControlLabel value="week" control={<Radio />} label="Week" />
                     <FormControlLabel value="month" control={<Radio />} label="Month" />
                   </RadioGroup>
                 </FormControl>
-                {displayOption === 'Weights' && (
-                  <FormControl component="fieldset">
-                    <FormLabel component="legend">Lift Type</FormLabel>
-                    <RadioGroup
-                      name="liftFilter"
-                      value={liftFilter}
-                      onChange={(e) => handleLiftFilterChange(e.target.value as 'Squat' | 'Deadlift' | 'Bench' | 'All')}
-                    >
-                      <FormControlLabel value="Squat" control={<Radio />} label="Squat" />
-                      <FormControlLabel value="Deadlift" control={<Radio />} label="Deadlift" />
-                      <FormControlLabel value="Bench" control={<Radio />} label="Bench" />
-                      <FormControlLabel value="All" control={<Radio />} label="All Lifts" />
-                    </RadioGroup>
-                  </FormControl>
-                )}
                 <Button onClick={handleDialogClose} variant="contained" color="primary" style={{ marginTop: '1rem' }}>
                   Apply Filters
                 </Button>
@@ -198,24 +278,36 @@ const LeaderboardStream: React.FC<LeaderboardProps> = ({ leaderboardData = [] })
           </div>
           <div className="Scores">
             <Grid container spacing={2} className="LeaderboardGrid">
-              {filteredLeaderboardData.sort((a, b) => b.score - a.score).map((entry, index) => (
-                <Grid item xs={12} key={entry.id} className="LeaderboardItem">
-                  <Box display="flex" alignItems="center" p={2} bgcolor="#2d2d2d" borderRadius={2} boxShadow={2}>
-                    <Typography variant="h5" component="div" style={{ width: '3rem', color: '#ffeb3b', fontWeight: 'bold' }}>
+              {sortedUsers?.map((user, index) => (
+                <Grid item xs={12} key={index}>
+                  <Box
+                    display="flex"
+                    alignItems="center"
+                    p={2}
+                    bgcolor="#2d2d2d"
+                    borderRadius={2}
+                    boxShadow={2}
+                  >
+                    <Typography
+                      variant="h5"
+                      component="div"
+                      style={{ width: '3rem', color: '#ffeb3b', fontWeight: 'bold' }}
+                    >
                       {index + 1}
                     </Typography>
-                    <Avatar style={{ marginRight: '1rem' }}>P</Avatar> {/* Placeholder avatar, replace 'P' with user profile pic */}
+                    {/* <Avatar style={{ marginRight: '1rem' }}>{user.userId[0].toUpperCase()}</Avatar> */}
                     <Box flexGrow={1}>
-                      <Typography variant="h6" style={{ color: '#f0f0f0' }}>{entry.name}</Typography>
-                      <LinearProgress
-                        variant="determinate"
-                        value={Math.min((entry.score / 100) * 100, 100)}
-                        color="primary"
-                        style={{ marginTop: '0.5rem' }}
-                      />
+                      <Typography variant="h6" style={{ color: '#f0f0f0' }}>
+                        {user.fullName}
+                      </Typography>
                     </Box>
-                    <Typography variant="h6" style={{ color: '#ffeb3b', fontWeight: 'bold', marginLeft: '1rem' }}>
-                      {displayOption === 'Calories' ? `${entry.caloriesBurned} kcal` : `${entry.score} lbs`}
+                    <Typography
+                      variant="h5"
+                      color="black"
+                    >
+                      {displayOption === 'Calories'
+                        ? `${user.totalCalories} cal`
+                        : `${user.totalWeight} lbs`}
                     </Typography>
                   </Box>
                 </Grid>

@@ -184,7 +184,6 @@ export const useAddUserWeight = () => {
     async onSuccess(newWeightData, { user_id }) {
       // do this for user data and their weight data
       queryClient.invalidateQueries({ queryKey: ['profileWeights', user_id] });
-
     }
   })
 }

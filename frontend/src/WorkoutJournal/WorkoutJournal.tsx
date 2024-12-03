@@ -28,7 +28,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import './WorkoutJournal.css';
 import { useAddExercise, useAddUserWeight, useAddWorkout, useGetUserExercises, useGetUserWeights, useGetUserWorkouts, useGetWorkoutExercises } from '../lib/supabase';
 import { useGlobalContext } from '../context/GlobalProvider';
-import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval, parseISO, format, add } from 'date-fns';
+import { startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval, parseISO, format } from 'date-fns';
 import FetchedWorkoutComponent from '../components/FetchedWorkoutComponent';
 import ExerciseContainer from '../components/ExerciseContainer';
 import EditExerciseDialog from '../components/EditExerciseDialog';
