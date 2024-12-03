@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Signup from './Singup/Signup';
+import Signup from './Signup/Signup';
 import Login from './Login/Login';
 import Home from './Home/Home';
 import Feedpage from './Feedpage/Feedpage'

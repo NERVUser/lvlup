@@ -22,8 +22,8 @@ import {
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import { useGlobalContext } from "../context/GlobalProvider";
-import { Navigate } from "react-router-dom";
-import { useGetAllUsers } from "../lib/supabase";
+import { Navigate, useNavigate } from "react-router-dom";
+import { logOut, useGetAllUsers } from "../lib/supabase";
 
 interface LeaderboardProps {
   leaderboardData: {
@@ -58,8 +58,9 @@ const LeaderboardStream: React.FC<LeaderboardProps> = ({ leaderboardData = [] })
   ]);
 
 
-  const { user } = useGlobalContext();
+  const { user, setUser, setIsLoggedIn } = useGlobalContext();
   const { data: allUsers } = useGetAllUsers();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const today = new Date();
@@ -137,7 +138,7 @@ const LeaderboardStream: React.FC<LeaderboardProps> = ({ leaderboardData = [] })
 
   return (
     <div className="LeaderboardContainer">
-      <Tabs value={tabValue} onChange={handleTabChange} centered>
+      <Tabs value={tabValue} onChange={handleTabChange} centered sx={{ marginBottom: 3 }}>
         <Tab label="Leaderboard" value="leaderboard" />
         <Tab label="Challenges" value="challenges" />
       </Tabs>
@@ -146,7 +147,7 @@ const LeaderboardStream: React.FC<LeaderboardProps> = ({ leaderboardData = [] })
           <div className="Title">
             <h1>Leaderboard</h1>
             <IconButton onClick={handleMenuClick}>
-              <MoreVertIcon />
+              <MoreVertIcon sx={{ color: 'white' }}/>
             </IconButton>
             <Dialog open={dialogOpen} onClose={handleDialogClose} fullWidth maxWidth="sm">
               <DialogTitle>Filters</DialogTitle>
@@ -245,6 +246,7 @@ const LeaderboardStream: React.FC<LeaderboardProps> = ({ leaderboardData = [] })
           ))}
         </div>
       )}
+      
     </div>
   );
 };
