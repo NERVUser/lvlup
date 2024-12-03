@@ -52,6 +52,7 @@ root.render(
               <Route element={<Layout><WorkoutJournal /></Layout>} path='/WorkoutJournal' />
               <Route element={<Layout><FoodJournal /></Layout>} path='/FoodJournal' />
               <Route element={<Layout><AccountSetup /></Layout>} path='/AccountSetup' />
+              <Route element={<Layout><AccountPage /></Layout>} path='/AccountPage' />
               <Route element={<Layout><RecommendationsPage /></Layout>} path='/Recommendations' />
               <Route element={<Layout><LeaderboardStream leaderboardData={[]} /></Layout>} path='/Leaderboard' />
               {/* <Route element={<Layout><Leaderboard leaderboardData={[]} /></Layout>} path='/LeaderboardStream' /> */}

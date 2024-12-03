@@ -1,2 +1,18 @@
-#feedpage {
+.Feedpage{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: black;
+    height: 100%;
+    justify-content: space-between;
+    width: 100%;
+}
+.PostContainer{
+    width: auto;
+    margin-top: 50px;
+}
+
+.LeaderBoardContainer{
+    margin-left: 5px;
+    margin-top: 50px;
 }
