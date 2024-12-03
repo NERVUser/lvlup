@@ -70,7 +70,7 @@ function SideNav() {
     setUser(null);
     setIsLoggedIn(false);
 
-    navigate('/signup');
+    navigate('/');
   }
 
   return (
