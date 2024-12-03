@@ -70,7 +70,7 @@ function SideNav() {
           color="primary"
           aria-label="open drawer"
         >
-          <MenuIcon />
+          <MenuIcon sx={{ fontSize: 30 }}/>
         </IconButton>
 
         {/* Drawer Component */}

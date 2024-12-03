@@ -131,8 +131,6 @@ const WorkoutJournal = () => {
       exerciseWeight: 0
     });
 
-    const [editWorkoutDialogOpen, setEditWorkoutDialogOpen] = useState(false);
-
     // this hook grabs all exercises for a particular workout
     // this gets called each time our current workout changes
     useEffect(() => {
