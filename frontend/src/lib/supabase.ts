@@ -264,6 +264,7 @@ export const useAddWorkout = () => {
     },
     async onSuccess() {
       queryClient.invalidateQueries({ queryKey: ['workouts']});
+      queryClient.invalidateQueries({ queryKey: ['exercises']});
     }
   })
 }
@@ -294,8 +295,8 @@ export const useAddExercise = () => {
         throw new Error(error.message);
       return newExerciseData
     },
-    async onSuccess({ workout_id }) {
-      queryClient.invalidateQueries({ queryKey: ['workout', workout_id] })
+    async onSuccess() {
+      queryClient.invalidateQueries({ queryKey: ['workout'] })
       queryClient.invalidateQueries({ queryKey: ['exercies'] })
     }
   })

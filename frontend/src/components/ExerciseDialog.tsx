@@ -50,18 +50,21 @@ function ExerciseDialog({ key, exercise, setExercises }: DialogProps) {
           <TextField
             label="Sets"
             margin='dense'
+            type='number'
             value={exercise.sets || ''}
             onChange={(e) => updateExercises(e, 'sets')}
           />
           <TextField
             label="Reps"
             margin='dense'
+            type='number'
             value={exercise.reps || ''}
             onChange={(e) => updateExercises(e, 'reps')}
           />
           <TextField
             label="Weight"
             margin='dense'
+            type='number'
             value={exercise.weight || ''}
             onChange={(e) => updateExercises(e, 'weight')}
           />
@@ -71,12 +74,14 @@ function ExerciseDialog({ key, exercise, setExercises }: DialogProps) {
         <TextField
           label="Calories Burned"
           margin='dense'
+          type='number'
           value={exercise.calories_burned || ''}
           onChange={(e) => updateExercises(e, 'calories_burned')}
         />
         <TextField
           label="Duration"
           margin='dense'
+          type='number'
           value={exercise.duration || ''}
           onChange={(e) => updateExercises(e, 'duration')}
         />
