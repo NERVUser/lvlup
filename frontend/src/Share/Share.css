@@ -1,75 +1,79 @@
 #share {
-    width: 100%;
-    background-color: rgb(69, 69, 69);
-    border-radius: 15px;
-}
-
-#share-wrapper {
+    width: 50%;
+    background-color: rgba(200, 208, 255, 0.2);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 10px;
+  }
+  
+  #share-wrapper {
     padding: 25px;
-}
-
-#share-top {
+  }
+  
+  #share-top {
     display: flex;
     align-items: center;
-}
-
-#share-prof-img {
+  }
+  
+  #share-prof-img {
     width: 50px;
     height: 50px;
     border-radius: 50%;
     object-fit: cover;
     margin-right: 20px;
-}
-
-#share-input {
+  }
+  
+  #share-input {
     border: none;
     width: 100%;
-    background-color: rgb(120,120,120);
+    background-color: rgb(120, 120, 120);
     font-size: 18px;
     border-radius: 10px;
     padding: 10px;
-}
-
-#share-input::placeholder {
-    color: rgb(220,220,220);
-}
-
-
-#share-input:focus {
+  }
+  
+  #share-input::placeholder {
+    color: rgb(220, 220, 220);
+  }
+  
+  #share-input:focus {
     outline: none;
-}
-
-#share-bottom {
+  }
+  
+  #share-bottom {
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin-top: 1vh;
-}
-
-#share-options {
+  }
+  
+  #share-options {
     display: flex;
     color: rgb(0, 169, 198);
-}
-
-.share-option {
+  }
+  
+  .share-option {
     display: flex;
     align-content: center;
     margin-right: 15px;
     cursor: pointer;
     margin-left: 70px;
-}
-
-.image-icon {
+  }
+  
+  .image-icon {
     font-size: 18px;
     margin-right: 10px;
-}
-
-.share-option-text {
+  }
+  
+  .share-option-text {
     font-size: 17px;
     font-weight: 500;
-}
-
-#share-button {
+  }
+  
+  #share-button {
     border: none;
     padding: 7px;
     border-radius: 15px;
@@ -78,8 +82,8 @@
     cursor: pointer;
     color: white;
     font-size: 15px;
-}
-
-#share-bottom {
-    margin-right: 1%;;
-}
+  }
+  
+  #share-bottom {
+    margin-right: 1%;
+  }

@@ -104,9 +104,6 @@ const WorkoutJournal = () => {
     const [fetchedWorkouts, setFetchedWorkouts] = useState<FetchedWorkout[] | null>(null);
     // used for all workouts that match selected date
     const [selectedWorkouts, setSelectedWorkouts] = useState<WorkoutProp[]>([]);
-    // used to toggle between searching for a workout and manually entering a new workout
-    const [toggledWorkoutType, setToggledWorkoutType] = useState(true);
-    const [editIndex, setEditIndex] = useState<number | null>(null);
     
     // grab our user, and then using his id, get all weights on the backend associated with that user
     const { user } = useGlobalContext();
@@ -268,8 +265,8 @@ const WorkoutJournal = () => {
 
     // this function adds a given exercise locally
     const handleAddExercise = (exercise: ExerciseProp) => {
-      // if(!exercise.exerciseName || !exercise.calories_burned || !exercise.duration)
-      //   return alert("Please fill in all fields");
+      if(!exercise.exerciseName || !exercise.calories_burned || !exercise.duration)
+        return alert("Please fill in all fields");
 
       // add our new exercise
       setNewExercises((prevExercises) => [...prevExercises, exercise]);
@@ -300,7 +297,8 @@ const WorkoutJournal = () => {
     }
 
     const handleSaveWorkout = async () => {
-      if(!newWorkoutName || !exercises)
+      // make sure that we have a workout name and exercises to add
+      if(!newWorkoutName || !newExercises)
         return alert("Please fill in all fields");
 
       // no matter what, we will make 1 workout
@@ -311,7 +309,7 @@ const WorkoutJournal = () => {
       })
 
       //handle a preset workout
-      if(toggledWorkoutType){
+      if(tabValue === 'search'){
         // if(!addExerciseForm.exerciseName)
         //   return alert("Please fill in exercise name");
 
