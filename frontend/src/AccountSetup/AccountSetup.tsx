@@ -61,11 +61,12 @@ function AccountSetup() {
   };
 
   const hanldeUpdateUser = () => {
-    setIsLoading(true);
     // only required fields here are age and weight
     if(!form.age || !form.weight)
       return alert("Please fill in weight and age first");
-
+    
+    setIsLoading(true);
+    
     try {
       // now update our user
       updateUser({
@@ -84,13 +85,21 @@ function AccountSetup() {
 
       navigate('/WorkoutJournal');
     } catch (error) {
-      
+      console.log("Error", error);
     } finally {
       setIsLoading(false);
     }
   }
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+    <Box sx={{ 
+      display: 'flex', 
+      justifyContent: 'center', 
+      alignItems: 'center',
+      backgroundColor: "#2d2d2d", 
+      borderRadius: '1rem',
+      padding: '3rem',
+    }}
+    >
       <Box sx={{ width: 500 }}>
         <Box sx={{ marginBottom: 2 }}>
           <SetupForm
@@ -132,14 +141,14 @@ function AccountSetup() {
         <Box>
           <Typography variant='h6' sx={{ marginBottom: 2 }}>How often do you workout?</Typography>
           <Button
-            sx={{ marginBottom: 2 }}
+            sx={{ marginBottom: 2, padding: 2 }}
             id='basic-button'
             aria-controls={open ? 'basic-menu' : undefined}
             aria-haspopup='true'
             aria-expanded={open ? 'true' : undefined}
             onClick={handleClick}
             fullWidth
-            variant='contained'
+            variant='outlined'
           >
             Select Fitness Level
           </Button>
@@ -170,6 +179,7 @@ function AccountSetup() {
               color='primary'
               fullWidth
               onClick={hanldeUpdateUser}
+              sx={{ padding: 2  }}
             >
               Save and Continue
             </Button>

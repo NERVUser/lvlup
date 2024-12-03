@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { ExerciseData, AddWeightData, AddWorkoutData, DeleteExerciseData, UpdateUserData, UpdateExerciseData } from './supabaseTypes';
+import { ExerciseData, AddWeightData, AddWorkoutData, DeleteExerciseData, UpdateUserData, UpdateExerciseData, AddMealData, DeleteMealData, EditMealData } from './supabaseTypes';
 import { format } from 'date-fns';
 
 const supabaseUrl = 'https://tlssadzfzfxcufxvijlt.supabase.co'
@@ -129,6 +129,22 @@ export const useUpdateUser = () => {
   })
 }
 
+// get all users
+export const useGetAllUsers = () => {
+  return useQuery({
+    queryKey: ['users'],
+    queryFn: async () => {
+      const { error, data } = await supabase
+        .from('profiles')
+        .select('*');
+      
+      if(error)
+        throw new Error(error.message);
+      return data;
+    }
+  })
+}
+
 // get all our weights given a userId
 export const useGetUserWeights = (id: string | undefined) => {
   return useQuery({
@@ -248,6 +264,7 @@ export const useAddWorkout = () => {
     },
     async onSuccess() {
       queryClient.invalidateQueries({ queryKey: ['workouts']});
+      queryClient.invalidateQueries({ queryKey: ['exercises']});
     }
   })
 }
@@ -278,8 +295,8 @@ export const useAddExercise = () => {
         throw new Error(error.message);
       return newExerciseData
     },
-    async onSuccess({ workout_id }) {
-      queryClient.invalidateQueries({ queryKey: ['workout', workout_id] })
+    async onSuccess() {
+      queryClient.invalidateQueries({ queryKey: ['workout'] })
       queryClient.invalidateQueries({ queryKey: ['exercies'] })
     }
   })
@@ -312,27 +329,137 @@ export const useUpdateExercise = () => {
   })
 }
 
-
 // delete exercise from database 
 export const useDeleteExercise = () => {
   const queryClient = useQueryClient();
 
   return useMutation<void, Error, DeleteExerciseData>({
     mutationFn: async (data: DeleteExerciseData) => {
-      const { error } = await supabase
+      const { error: exerciseError } = await supabase
+      .from('exercises')
+      .delete()
+      .eq('id', data.id);
+      
+      // if this is the last exercise of a workout, just delete the workout
+      const { data: exercises } = await supabase
         .from('exercises')
-        .delete()
-        .eq('id', data.id);
+        .select('*')
+        .eq('workout_id', data.workout_id);
 
-      if (error)
-        throw new Error(error.message);
+      // if length is 0, we know that was the last exercise of that workout
+      if(exercises?.length === 0) {
+        const { error } = await supabase
+          .from('workouts')
+          .delete()
+          .eq('id', data.workout_id);
+      }
+
+      if (exerciseError)
+        throw new Error("Error deleting exercise");
     },
     onSuccess: () => {
       // Invalidate queries to refresh exercise data
       queryClient.invalidateQueries({ queryKey: ['exercises'] });
+      queryClient.invalidateQueries({ queryKey: ['workouts'] });
     },
   })
 }
 
+// add a meal
+export const useAddMeal = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<AddMealData, Error, AddMealData>({
+    mutationFn: async (data: AddMealData) => {
+      const { error, data: newMeal } = await supabase
+        .from('meals')
+        .insert({
+          created_at: created_at,
+          name: data.name,
+          calories: data.calories,
+          protein: data.protein,
+          carbs: data.carbs,
+          fats: data.fats,
+          quantity: data.quantity,
+          meal_type: data.meal_type,
+          user_id: data.user_id
+        })
+        .select('*')
+        .single();
+
+        if(error)
+          throw new Error(error.message);
+        return newMeal;
+    },
+    async onSuccess() {
+      queryClient.invalidateQueries({ queryKey: ['meals'] });
+    }
+  })
+}
+
+// get all meals from a user
+export const useGetUserMeals = (id: string | undefined) => {
+  return useQuery({
+    queryKey: ['meals'],
+    queryFn: async () => {
+      const { error, data } = await supabase
+        .from('meals')
+        .select('*')
+        .eq('user_id', id)
+
+      if(error)
+        throw new Error(error.message)
+      return data;
+    }
+  })
+} 
+
+// edit a meal
+export const useEditMeal = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, EditMealData>({
+    mutationFn: async (data: EditMealData) => {
+      const { error } = await supabase
+        .from('meals')
+        .update({
+          name: data.name,
+          calories: data.calories,
+          carbs: data.carbs,
+          protein: data.protein,
+          fats: data.fats,
+          quantity: data.quantity,
+        })
+        .eq('id', data.id);
+
+      if(error)
+        throw new Error(error.message);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['meals'] })
+    }
+  })
+}
+
+// delete a meal
+export const useDeleteMeal = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<void, Error, DeleteMealData>({
+    mutationFn: async (data: DeleteMealData) => {
+      const { error } = await supabase
+        .from('meals')
+        .delete()
+        .eq('id', data.id);
+
+      if(error)
+        throw new Error(error.message);
+    },
+    onSuccess: () => {
+      // Invalidate queries to refresh meal data
+      queryClient.invalidateQueries({ queryKey: ['meals'] });
+    },
+  })
+}
 
 

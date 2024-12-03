@@ -67,7 +67,7 @@ function SideNav() {
 
   const handleLogout = async () => {
     await logOut();
-    //setUser(null);
+    setUser(null);
     setIsLoggedIn(false);
 
     navigate('/');

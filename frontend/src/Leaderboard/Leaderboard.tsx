@@ -85,71 +85,67 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ leaderboardData }) => {
   const handleLiftFilterChange = (lift: 'Squat' | 'Deadlift' | 'Bench' | 'All') => {
     setLiftFilter(lift);
   };
-
-  if(!isLoggedIn)
-    return <Navigate to='/' />
-  else {
-    return (
-      <div className="LeaderboardContainer">
-        <div className="Title">
-          <h1>Leaderboard</h1>
-          <IconButton onClick={handleMenuClick}>
-            <MoreVertIcon />
-          </IconButton>
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleMenuClose}
-          >
-            <MenuItem onClick={() => handleFilterChange('day')}>Day</MenuItem>
-            <MenuItem onClick={() => handleFilterChange('week')}>Week</MenuItem>
-            <MenuItem onClick={() => handleFilterChange('month')}>Month</MenuItem>
-          </Menu>
+  
+  return (
+    <div className="LeaderboardContainer">
+      <div className="Title">
+        <h1>Leaderboard</h1>
+        <IconButton onClick={handleMenuClick}>
+          <MoreVertIcon />
+        </IconButton>
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={handleMenuClose}
+        >
+          <MenuItem onClick={() => handleFilterChange('day')}>Day</MenuItem>
+          <MenuItem onClick={() => handleFilterChange('week')}>Week</MenuItem>
+          <MenuItem onClick={() => handleFilterChange('month')}>Month</MenuItem>
+        </Menu>
+      </div>
+      <div className="Buttons">
+        <div className="ButtonObject">
+          <button onClick={() => handleLiftFilterChange('Squat')}>Squats</button>
         </div>
-        <div className="Buttons">
-          <div className="ButtonObject">
-            <button onClick={() => handleLiftFilterChange('Squat')}>Squats</button>
-          </div>
-          <div className="ButtonObject">
-            <button onClick={() => handleLiftFilterChange('Deadlift')}>Deadlift</button>
-          </div>
-          <div className="ButtonObject">
-            <button onClick={() => handleLiftFilterChange('Bench')}>Bench</button>
-          </div>
-          <div className="ButtonObject">
-            <button onClick={() => handleLiftFilterChange('All')}>All</button>
-          </div>
+        <div className="ButtonObject">
+          <button onClick={() => handleLiftFilterChange('Deadlift')}>Deadlift</button>
         </div>
-        <div className="Scores">
-          <table className="LeaderboardTable">
-            <thead>
-              <tr>
-                <th>Rank</th>
-                <th>Profile</th>
-                <th>Score</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredLeaderboardData.sort((a, b) => b.score - a.score).map((entry, index) => (
-                <tr key={entry.id}>
-                  <td>{index + 1}</td>
-                  <td>{entry.name}</td>
-                  <td>
-                    <LinearProgress
-                      variant="determinate"
-                      value={Math.min((entry.score / 100) * 100, 100)}
-                      color="primary"
-                    />
-                    <span className="ScoreValue">{entry.score}</span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="ButtonObject">
+          <button onClick={() => handleLiftFilterChange('Bench')}>Bench</button>
+        </div>
+        <div className="ButtonObject">
+          <button onClick={() => handleLiftFilterChange('All')}>All</button>
         </div>
       </div>
-    );
-  }
+      <div className="Scores">
+        <table className="LeaderboardTable">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Profile</th>
+              <th>Score</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredLeaderboardData.sort((a, b) => b.score - a.score).map((entry, index) => (
+              <tr key={entry.id}>
+                <td>{index + 1}</td>
+                <td>{entry.name}</td>
+                <td>
+                  <LinearProgress
+                    variant="determinate"
+                    value={Math.min((entry.score / 100) * 100, 100)}
+                    color="primary"
+                  />
+                  <span className="ScoreValue">{entry.score}</span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
 
 };
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Signup from './Singup/Signup';
+import Signup from './Signup/Signup';
 import Login from './Login/Login';
 import Home from './Home/Home';
 import Feedpage from './Feedpage/Feedpage'
@@ -16,6 +16,7 @@ import RecommendationsPage from './Recommendations/Recommendations';
 import LeaderboardStream from './LeaderboardStream/LeaderboardStream';
 import AccountPage from './AccountPage/AccountPage';
 import './index.css'
+import Leaderboard from './Leaderboard/Leaderboard';
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -47,13 +48,13 @@ root.render(
             <Route element={<Signup />} path='/signup' />
 
             <Route element={<PrivateRoutes />}>
-              <Route element={<Layout><Feedpage /></Layout>} path='/feedpage' />
-              <Route element={<Layout><WorkoutJournal /></Layout>} path='/workoutjournal' />
-              <Route element={<Layout><FoodJournal /></Layout>} path='/foodjournal' />
-              <Route element={<Layout><AccountSetup /></Layout>} path='/accountsetup' />
-              <Route element={<Layout><RecommendationsPage /></Layout>} path='/recommendations' />
-              <Route element={<Layout><AccountPage /></Layout>} path='/accountpage' />
-              <Route element={<Layout><LeaderboardStream leaderboardData={[]} /></Layout>} path='/leaderboards' />
+              <Route element={<Layout><Feedpage /></Layout>} path='/Feedpage' />
+              <Route element={<Layout><WorkoutJournal /></Layout>} path='/WorkoutJournal' />
+              <Route element={<Layout><FoodJournal /></Layout>} path='/FoodJournal' />
+              <Route element={<Layout><AccountSetup /></Layout>} path='/AccountSetup' />
+              <Route element={<Layout><RecommendationsPage /></Layout>} path='/Recommendations' />
+              <Route element={<Layout><LeaderboardStream leaderboardData={[]} /></Layout>} path='/Leaderboard' />
+              {/* <Route element={<Layout><Leaderboard leaderboardData={[]} /></Layout>} path='/LeaderboardStream' /> */}
             </Route>
           </Routes>
         </BrowserRouter>

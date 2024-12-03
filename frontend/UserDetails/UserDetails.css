@@ -1,0 +1,29 @@
+#see user details when select Profile
+.UserInfo{
+    border-radius: 8px;
+    border: 1px beige;
+    color: beige;
+}
+
+.UserBio{
+    display: flex;
+    flex-direction: column;
+    font-size: large;
+    margin: auto;
+}
+.UserWorkoutFreq{
+    display: flex;
+    flex-direction: column;
+    font-size:large;
+    margin: auto;
+}
+.UserAge{
+    display: flex;
+    background-color: aliceblue;
+    border-radius: 2px;
+}
+.UserWeight{
+    display: block;
+    background-color: beige;
+
+}

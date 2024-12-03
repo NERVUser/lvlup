@@ -16,6 +16,8 @@ import {
     IconButton,
     Box,
     DialogContentText,
+    Tabs,
+    Tab,
 } from '@mui/material';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
@@ -112,6 +114,8 @@ const WorkoutJournal = () => {
     const { data: userWorkouts } = useGetUserWorkouts(user?.id);
     const { data: userExercises } = useGetUserExercises(user?.id);
 
+    // our tabs for adding workouts
+    const [tabValue, setTabValue] = useState<'search' | 'manual'>('search');
 
     // mutations for adding new database entries
     const { mutate: addWeight } = useAddUserWeight();
@@ -130,8 +134,6 @@ const WorkoutJournal = () => {
       exerciseReps: 0,
       exerciseWeight: 0
     });
-
-    const [editWorkoutDialogOpen, setEditWorkoutDialogOpen] = useState(false);
 
     // this hook grabs all exercises for a particular workout
     // this gets called each time our current workout changes
@@ -182,7 +184,11 @@ const WorkoutJournal = () => {
         setSelectedWorkouts(filteredWorkouts)
 
       }
-    }, [selectedDate, userExercises]);
+    }, [selectedDate, userExercises, userWorkouts]);
+
+    const handleTabChange = (event: React.SyntheticEvent, newValue: 'search' | 'manual') => {
+      setTabValue(newValue);
+    };
     
     const handleCancelWeightDialog = () => {
       setNewWeight(0);
@@ -590,11 +596,11 @@ const WorkoutJournal = () => {
 
         {/* Add Workout Dialog */}
         <Dialog open={openDialog} onClose={handleCloseDialog}>
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '25px', gap: '20px' }}>
-            <Button variant='outlined' onClick={() => setToggledWorkoutType(true)}>Search For a Workout</Button>
-            <Button variant='outlined' onClick={() => setToggledWorkoutType(false)}>Add Workout Details</Button>
-          </Box>
-          {toggledWorkoutType ? (
+          <Tabs value={tabValue} onChange={handleTabChange} centered sx={{ marginTop: 3 }}>
+            <Tab label='Search For a Workout' value='search'/>
+            <Tab label='Add Workout Details' value='manual'/>
+          </Tabs>
+          {tabValue === 'search' && (
             <DialogContent>
               <TextField
                 label='Search for an exercise'
@@ -634,7 +640,8 @@ const WorkoutJournal = () => {
                 ))}
               </List>}
             </DialogContent>
-          ) : (
+          )}
+          {tabValue === 'manual' && (
             <DialogContent>
               <TextField
                 label="Workout Name"

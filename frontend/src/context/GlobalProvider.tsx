@@ -15,7 +15,7 @@ interface UserInfo {
 // Define the type for the context state
 interface AppContextState {
   user: UserInfo | null;
-  setUser: (user: UserInfo) => void;
+  setUser: (user: UserInfo | null) => void;
   isLoggedIn: boolean;
   setIsLoggedIn: (isLoggedIn: boolean) => void;
   isLoading: boolean;
