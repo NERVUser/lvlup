@@ -112,12 +112,12 @@ function SideNav() {
                 <ListItemText primary="Food" />
               </ListItemButton>
 
-              <ListItemButton onClick={() => handleNavigate('/AccountPage')}>
+              {/*<ListItemButton onClick={() => handleNavigate('/AccountPage')}>
                 <ListItemIcon>
                   <AccountCircleIcon sx={{ color: '#ffffff' }} />
                 </ListItemIcon>
                 <ListItemText primary="Account" />
-              </ListItemButton>
+              </ListItemButton>*/}
 
               <ListItemButton onClick={() => handleNavigate('/Recommendations')}>
                 <ListItemIcon>
